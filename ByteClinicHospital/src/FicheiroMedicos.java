@@ -57,7 +57,7 @@ public class FicheiroMedicos {
 
     public Medico procurarMedicoPorNome(String medicos) {
         for (int i = 0; i < totalMedicos; i++) {
-            if (listaMedicos.getNomeMedico().equalsIgnoreCase(nomeMedico)) return listaMedicos[i];
+            if (listaMedicos[i].getNomeMedico().equalsIgnoreCase(medicos)) return listaMedicos[i];
         }
         return null;
     }
@@ -65,24 +65,24 @@ public class FicheiroMedicos {
     public Medico[] procurarMedicoPorEspecialidade(String especialidade) {
         int contador = 0;
         for (int i = 0; i < totalMedicos; i++) {
-            if (listaMedicos.getEspecialidade.equalsIgnoreCase(especialidade)) {
+            if (listaMedicos[i].getEspecialidade().equalsIgnoreCase(especialidade)) {
                 contador++;
             }
         }
         Medico[] especialidadeMedico = new Medico[contador];
         int index = 0;
         for (int i = 0; i < totalMedicos; i++) {
-            if (listaMedicos.getEspecialidade.equalsIgnoreCase(especialidade)) {
+            if (listaMedicos[i].getEspecialidade().equalsIgnoreCase(especialidade)) {
                 especialidadeMedico[index++] = listaMedicos[i]; //???
             }
         }
         return especialidadeMedico;
     }
 
-    public boolean removerMedico(String nomeMedico) {
+    public boolean removerMedico(String medicos) {
         int contador = -1;
         for (int i = 0; i < totalMedicos; i++) {
-            if (listaMedicos.getNome.equals.IgnoreCase(nomeMedico)) {
+            if (listaMedicos[i].getNomeMedico().equalsIgnoreCase(medicos)) {
                 contador = i;
                 break;
             }
@@ -101,11 +101,11 @@ public class FicheiroMedicos {
             for (int i = 0; i < totalMedicos; i++) {
                 Medico medico = listaMedicos[i];
                 out.format("%s;%s;%d;%d;%.2f%n",
-                        medico.getNome,
-                        medico.getEspecialidade,
-                        medico.getHoraEntrada,
-                        medico.getHoraSaida,
-                        medico.getSalarioHora);
+                        medico.getNomeMedico(),
+                        medico.getEspecialidade(),
+                        medico.getHoraEntrada(),
+                        medico.getHoraSaida(),
+                        medico.getSalarioHora());
             }
             out.close();
             System.out.println("Ficheiro guardado com sucesso!");
