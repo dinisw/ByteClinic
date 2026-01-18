@@ -97,7 +97,7 @@ public class FicheiroMedicos {
 
     public void guardaFicheiroMedico(String ficheiro) {
         try {
-            Formatter out = new Formatter(new File("medicos.txt"));
+            Formatter out = new Formatter(new FileWriter("medicos.txt"));
             for (int i = 0; i < totalMedicos; i++) {
                 Medico medico = listaMedicos[i];
                 out.format("%s;%s;%d;%d;%.2f%n",
@@ -109,8 +109,8 @@ public class FicheiroMedicos {
             }
             out.close();
             System.out.println("Ficheiro guardado com sucesso!");
-        } catch (FileNotFoundException e) {
-            System.out.println("Erro ao carregar o ficheiro" + e.getMessage());
+        } catch (IOException ex) {
+            System.out.println("Erro ao carregar o ficheiro" + ex.getMessage());
         }
     }
 }
