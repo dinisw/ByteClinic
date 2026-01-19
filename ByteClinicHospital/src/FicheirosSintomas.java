@@ -71,4 +71,21 @@ public class FicheirosSintomas {
         } catch (IOException e) {
             System.out.println("Erro ao carregar sintomas" + e.getMessage());        }
     }
+
+    public boolean removerSintoma(String sintoma) {
+        int contador = -1;
+        for(int i = 0; i < totalSintomas; i++) {
+            if(listaSintomas[i].getNomeSintoma().equalsIgnoreCase(sintoma)) {
+                contador = i;
+                break;
+            }
+        }
+        for ( int i = 0; i < totalSintomas - 1; i++) { //Volta para a esquerda para não haver espaços vazios.
+            listaSintomas[i] = listaSintomas[i + 1];
+        }
+        listaSintomas[totalSintomas - 1] = null;
+        totalSintomas--;
+        return true;
+    }
+    
 }
