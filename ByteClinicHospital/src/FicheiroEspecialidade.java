@@ -88,4 +88,14 @@ public class FicheiroEspecialidade {
         }
         return null;
     }
+
+    public boolean atualizarSintoma(String sigla, String novoNome){
+        for(int i = 0; i < totalEspecialidade; i++) {
+            if(listaEspecialidade[i].getNome().equalsIgnoreCase(sigla)) {
+                listaEspecialidade[i].setNome(novoNome);
+                return true;
+            }
+        }
+        return false;
+    }
 }
