@@ -116,4 +116,17 @@ public class FicheiroMedicos {
             System.out.println("Erro ao carregar o ficheiro" + ex.getMessage());
         }
     }
+
+    public boolean atualizarMedico(String nomeMedico, String especialidade, int horaEntrada, int horaSaida, double salarioHora) {
+        Medico medico = procurarMedicoPorNome(nomeMedico);
+        if (medico != null) {
+            medico.setEspecialidade(especialidade);
+            medico.setHoraEntrada(horaEntrada);
+            medico.setHoraSaida(horaSaida);
+            medico.setSalarioHora(salarioHora);
+            System.out.println("Medico atualizado com sucesso!");
+            return true;
+        }
+        return false;
+    }
 }
