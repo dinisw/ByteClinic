@@ -54,7 +54,10 @@ public class FicheiroMedicos {
         this.listaMedicos = expandir;
         System.out.println("Array redimensionado para: " + listaMedicos.length);
     }
-
+    public Medico[] getMedicos() {
+        if (listaMedicos.length > 0) return listaMedicos;
+        else return null;
+    }
     public Medico procurarMedicoPorNome(String medicos) {
         for (int i = 0; i < totalMedicos; i++) {
             if (listaMedicos[i].getNomeMedico().equalsIgnoreCase(medicos)) return listaMedicos[i];
