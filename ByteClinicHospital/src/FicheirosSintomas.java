@@ -87,5 +87,16 @@ public class FicheirosSintomas {
         totalSintomas--;
         return true;
     }
-    
+
+    public Sintomas[] getSintomas(){
+        if(listaSintomas.length > 0) return listaSintomas;
+        else return null;
+    }
+
+    public Sintomas procurarSintoma(String sintoma) {
+        for(int i = 0; i < totalSintomas; i++) {
+            if(listaSintomas[i].getNomeSintoma().equalsIgnoreCase(sintoma)) return  listaSintomas[i];
+        }
+        return null;
+    }
 }
