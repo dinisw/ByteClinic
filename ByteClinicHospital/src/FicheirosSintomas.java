@@ -89,8 +89,7 @@ public class FicheirosSintomas {
     }
 
     public Sintomas[] getSintomas(){
-        if(listaSintomas.length > 0) return listaSintomas;
-        else return null;
+        return listaSintomas;
     }
 
     public Sintomas procurarSintoma(String sintoma) {
@@ -100,10 +99,10 @@ public class FicheirosSintomas {
         return null;
     }
 
-    public boolean atualuzarSintoma(String nomeSintoma, String corPulseira) {
+    public boolean atualuzarSintoma(String nomeSintoma, NivelSintomas nivelSintomas) {
         Sintomas sintomas = procurarSintoma(nomeSintoma);
         if(sintomas != null) {
-            sintomas.setCor(corPulseira);
+            sintomas.setNivelSintoma(nivelSintomas);
             return true;
         }
         return false;
