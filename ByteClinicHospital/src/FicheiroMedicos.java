@@ -142,7 +142,7 @@ public class FicheiroMedicos {
                 break;
             }
         }
-        for (int i = 0; i < totalMedicos - 1; i++) {
+        for (int i = contador; i < totalMedicos - 1; i++) {
             listaMedicos[i] = listaMedicos[i + 1];
         }
         listaMedicos[totalMedicos - 1] = null;
