@@ -4,14 +4,14 @@ public class Utente {
     //Atributos: nome, sintomas (Array de Sintoma), pulseira (cor atribuída), medicoAtribuido (referência ou nome).
     private String nomeUtente;
     private Sintomas[] sintomas;
-    private String pulseira;
+    private NivelSintomas nivelSintomas;
     private Medico medico;
     private int horaEntrada;
 
-    public Utente(String nomeUtente, Sintomas[] sintomas, String pulseira, Medico medico, int horaEntrada) {
+    public Utente(String nomeUtente, Sintomas[] sintomas, NivelSintomas nivelSintomas, Medico medico, int horaEntrada) {
         this.nomeUtente = nomeUtente;
         this.sintomas = sintomas;
-        this.pulseira = pulseira;
+        this.nivelSintomas = nivelSintomas;
         this.medico = medico;
         this.horaEntrada = horaEntrada;
     }
@@ -32,12 +32,12 @@ public class Utente {
         this.sintomas = sintomas;
     }
 
-    public String getPulseira() {
-        return pulseira;
+    public NivelSintomas getNivelSintoma() {
+        return nivelSintomas;
     }
 
-    public void setPulseira(String pulseira) {
-        this.pulseira = pulseira;
+    public void setNivelSintoma(NivelSintomas nivelSintomas) {
+        this.nivelSintomas = nivelSintomas;
     }
 
     public Medico getMedico() {
@@ -59,11 +59,13 @@ public class Utente {
     @Override
     public String toString() {
         return "Utente{" +
-                "nomeUtente='" + nomeUtente + '\'' +
-                ", sintomas=" + Arrays.toString(sintomas) +
-                ", pulseira='" + pulseira + '\'' +
-                ", medico=" + medico +
-                ", horaEntrada=" + horaEntrada +
+                "Nome: '" + nomeUtente +
+                "\nSintomas: " + Arrays.toString(sintomas) +
+                "\nCor da pulseira: '" + nivelSintomas.getCor() +
+                "\nCor da pulseira: '" + nivelSintomas.getCor() +
+                "\nNível do sintoma : '" + nivelSintomas.getNivel() +
+                "\nMédico: " + medico +
+                "\nHora de entrada: " + horaEntrada +
                 '}';
     }
 }

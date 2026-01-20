@@ -1,11 +1,11 @@
 public class Sintomas {
     private String nomeSintoma;
-    private NivelSintoma nivelSintoma;
+    private NivelSintomas nivelSintomas;
     private Especialidades especialidadesAssociadas;
 
-    public Sintomas(String nomeSintoma, NivelSintoma nivelSintoma, Especialidades especialidadesAssociadas) {
+    public Sintomas(String nomeSintoma, NivelSintomas nivelSintomas, Especialidades especialidadesAssociadas) {
         this.nomeSintoma = nomeSintoma;
-        this.nivelSintoma = nivelSintoma;
+        this.nivelSintomas = nivelSintomas;
         this.especialidadesAssociadas = especialidadesAssociadas;
     }
 
@@ -20,12 +20,12 @@ public class Sintomas {
         this.nomeSintoma = nomeSintoma;
     }
 
-    public NivelSintoma getNivelSintoma() {
-        return nivelSintoma;
+    public NivelSintomas getNivelSintoma() {
+        return nivelSintomas;
     }
 
-    public void setNivelSintoma(NivelSintoma nivelSintoma) {
-        this.nivelSintoma = nivelSintoma;
+    public void setNivelSintoma(NivelSintomas nivelSintomas) {
+        this.nivelSintomas = nivelSintomas;
     }
 
     public Especialidades getEspecialidadesAssociadas() {
@@ -40,13 +40,13 @@ public class Sintomas {
     public String toString() {
         return "Sintomas{" +
                 "nomeSintoma='" + nomeSintoma + '\'' +
-                ", cor='" + nivelSintoma + '\'' +
+                ", cor='" + nivelSintomas + '\'' +
                 ", especialidadesAssociadas='" + especialidadesAssociadas + '\'' +
                 '}';
     }
 
     public String paraFicheiro() {
-        String linha = nomeSintoma + ";" + nivelSintoma;
+        String linha = nomeSintoma + ";" + nivelSintomas;
         if (especialidadesAssociadas != null) {
             linha += ";" + especialidadesAssociadas;
         }
