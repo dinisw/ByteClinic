@@ -362,6 +362,7 @@ public class Main {
 
     //region REGISTAR MEDICO
     private static void registarMedico(Scanner ler) {
+        ficheiroMedicos.carregarFicheiro("medicos.txt");
         System.out.println("\n" + CYAN_BOLD + "--- REGISTAR MÉDICO ---" + RESET);
         try {
             System.out.print("Nome: ");
@@ -382,10 +383,11 @@ public class Main {
             System.out.print("Hora Saída (0-23): ");
             int horaSaida = Integer.parseInt(ler.nextLine());
             System.out.println("Salário Hora: ");
-            double salario = Double.parseDouble(ler.nextLine().replace(",", "."));
-
-            Medico medico = new Medico(nome,cedula,especialidade,horaEntrada,horaSaida,salario);
-            ficheiroMedicos.adicionarMedico(medico);
+            int salario = Integer.parseInt(ler.nextLine());
+            ler.nextLine();
+            Medico medicos = new Medico(nome,cedula,especialidade,horaEntrada,horaSaida, salario);
+            ficheiroMedicos.adicionarMedico(medicos);
+            ficheiroMedicos.guardarFicheiroMedico(medicos, "medicos.txt");
             System.out.println(GREEN + "Médico registado com sucesso!" + RESET);
         } catch (NumberFormatException e) {
             System.out.println(RED + "Erro: Introduza números válidos." + RESET);
@@ -397,6 +399,7 @@ public class Main {
     //region LISTAR MEDICO
     private static void listarMedicos(Scanner ler) {
         System.out.println("\n" + CYAN_BOLD + "--- EQUIPA MÉDICA ---" + RESET);
+        ficheiroMedicos.carregarFicheiro("medicos.txt");
         Medico[] lista = ficheiroMedicos.getListaMedicos();
         int total = ficheiroMedicos.getTotalMedicos();
         int horaAtual = LocalDateTime.now().getHour();
@@ -458,7 +461,7 @@ public class Main {
         System.out.print("Nova Especialidade: "); String especialidade = ler.nextLine();
         System.out.print("Nova Entrada: "); int entrada = Integer.parseInt(ler.nextLine());
         System.out.print("Nova Saída: "); int saida= Integer.parseInt(ler.nextLine());
-        System.out.print("Novo Salário: "); double salario = Double.parseDouble(ler.nextLine().replace(",", "."));
+        System.out.print("Novo Salário: "); int salario = Integer.parseInt(ler.nextLine());
 
         ficheiroMedicos.atualizarMedico(cedula,nome,especialidade,entrada,saida,salario);
         System.out.println(GREEN + "Atualizado com sucesso" + RESET);
@@ -467,6 +470,7 @@ public class Main {
 
     //region REMOVER MEDICO
     private static void removerMedico(Scanner ler) {
+        ficheiroMedicos.carregarFicheiro("medicos.txt");
         System.out.print("Cédula a remover: ");
         int cedula = Integer.parseInt(ler.nextLine());
         if (ficheiroMedicos.removerMedico(cedula)) {
@@ -645,10 +649,187 @@ public class Main {
 
 
 
+    //region MENU SINTOMAS
     private static void menuSintomas(Scanner ler) {
-        System.out.println("\n--- Módulo de Sintomas ---");
+        String opcao = "";
+
+        do {
+            System.out.println("\033[H\033[2J");
+            System.out.flush();
+
+            String bordaSuperior = "╔" + "═".repeat(LARGURA) + "╗";
+            String bordaMeio = "╠" + "═".repeat(LARGURA) + "╣";
+            String bordaInferior = "╚" + "═".repeat(LARGURA) + "╝";
+
+            String titulo = "GESTÃO DE SINTOMAS (TRIAGEM)";
+            int paddingTitulo = (LARGURA - titulo.length()) / 2;
+            String textoTitulo = String.format("%" + paddingTitulo + "s%s%-" + paddingTitulo + "s", "", titulo, "");
+            if (textoTitulo.length() < LARGURA) textoTitulo += " ";
+
+            System.out.println(CYAN_BOLD + bordaSuperior + RESET);
+            System.out.println(CYAN_BOLD + "║" + WHITE_BOLD + textoTitulo + CYAN_BOLD + "║" + RESET);
+            System.out.println(CYAN_BOLD + bordaMeio + RESET);
+
+            String[] opcoes = {
+                    "1. Registar Novo Sintoma",
+                    "2. Listar Sintomas e Cores",
+                    "3. Pesquisar Sintoma",
+                    "4. Remover Sintoma",
+                    "0. Sair"
+            };
+
+            for (String opcao2 : opcoes) {
+                System.out.println(CYAN_BOLD + "║ " + RESET + String.format("%-" + (LARGURA - 1) + "s", opcao2) + CYAN_BOLD + "║" + RESET);
+            }
+            System.out.println(CYAN_BOLD + bordaInferior + RESET);
+
+            System.out.print("\n" + WHITE_BOLD + "Selecione uma opção: " + RESET);
+            opcao = ler.nextLine();
+
+            switch (opcao) {
+                case "1":
+                    registarSintomas(ler);
+                    break;
+                case "2":
+                    listarSintomas(ler);
+                    break;
+                case "3":
+                    pesquisarSintoma(ler);
+                    break;
+                case "4":
+                    removerSintoma(ler);
+                    break;
+                case "0":
+                    break;
+                default:
+                    System.out.println("\n" + RED + "Opção inválida! Tente novamente." + RESET);
+                    pressionarEnter(ler);
+            }
+        } while (!opcao.equals("0"));
+    }
+    //endregion
+
+    //region REGISTAR SINTOMAS
+    private static void registarSintomas(Scanner ler) {
+        System.out.println("\n" + CYAN_BOLD + "--- NOVO SINTOMA ---" + RESET);
+        System.out.print("Nome do Sintoma (ex: Febre Alta): ");
+        String nome = ler.nextLine().toUpperCase();
+
+        if (ficheirosSintomas.procurarSintoma(nome) != null) {
+            System.out.println(RED + "Erro: Esse Sintoma já existe!" + RESET);
+            pressionarEnter(ler);
+            return;
+        } else {
+
+            System.out.println("\nSelecione o Nível de Urgência (Cor da Pulseira):");
+            NivelSintoma[] nivelSintomas = NivelSintoma.values();
+
+            for (int i = 0; i < nivelSintomas.length; i++) {
+                System.out.printf("%d - %s (%s)", (i + 1), nivelSintomas[i].getCor(), nivelSintomas[i].getNivel());
+            }
+            System.out.println("Opção: ");
+            int opcao = -1;
+            try {
+                opcao = Integer.parseInt(ler.nextLine());
+            } catch (NumberFormatException e) {
+                opcao = -1;
+            }
+            if (opcao < 1 || opcao > nivelSintomas.length) {
+                System.out.println(RED + "Opção inválida." + RESET);
+                pressionarEnter(ler);
+                return;
+            }
+            NivelSintoma opcaoSelecionado = nivelSintomas[opcao -1];
+            System.out.println("\nAssociar a qual a especialidade? (Sigla)");
+            for (Especialidades especialidade : Especialidades.values()) {
+                System.out.println(especialidade.getCodigo() + " ");
+            }
+            System.out.println("\nSigla: ");
+            String siglaIntroduzida = ler.nextLine().toUpperCase();
+
+            Especialidades especialidades = null;
+            for (Especialidades especialidades2 : Especialidades.values()) {
+                if (especialidades2.getCodigo().equals(siglaIntroduzida)) {
+                    especialidades = especialidades2;
+                    break;
+                }
+            }
+
+            if (especialidades == null) {
+                System.out.println(YELLOW + "Erro: Sigla não encontrada no sistema. Será registado sem especialidade automática." + RESET);
+            }
+            Sintomas sintomas = new Sintomas(nome,opcaoSelecionado,especialidades);
+            ficheirosSintomas.adicionarSintoma(novoSintoma);
+
+            System.out.println(GREEN + "Sintoma registado com sucesso!" + RESET);
+            pressionarEnter(ler);
+        }
+    }
+    //endregion
+
+    //region LISTAR SINTOMAS
+    private static void listarSintomas(Scanner ler) {
+        System.out.println("\n" + CYAN_BOLD + "--- LISTA DE SINTOMAS ---" + RESET);
+        Sintomas[] lista = ficheirosSintomas.getSintomas();
+
+        if (lista == null) {
+            System.out.println(YELLOW + "Nenhuma sintomaregistado." + RESET);
+        } else {
+            System.out.printf("%-20s %-15s %-15s %-20s\n", "NOME", "COR", "URGÊNCIA", "ESPECIALIDADE");
+            System.out.println("--------------------------------------------------------------------------");
+            for (Sintomas sintomas : lista) {
+                if (sintomas != null) {
+                    String corTexto = RESET;
+                    if (sintomas.getNivelSintoma() == NivelSintoma.VERMELHO) corTexto = RED;
+                    else if (sintomas.getNivelSintoma() == NivelSintoma.LARANJA) corTexto = YELLOW;
+                    else if (sintomas.getNivelSintoma() == NivelSintoma.VERDE) corTexto = GREEN;
+
+                    String nomeEspecialidade = (sintomas.getEspecialidadesAssociadas() != null) ? sintomas.getEspecialidadesAssociadas().getNome() : "---";
+
+                    System.out.printf("%-20s " + corTexto + "%-15s %-15s" + RESET + " %-20s\n",
+                            sintomas.getNomeSintoma(),
+                            sintomas.getNivelSintoma().getCor(),
+                            sintomas.getNivelSintoma().getNivel(),
+                            nomeEspecialidade);
+                }
+            }
+        }
         pressionarEnter(ler);
     }
+    //endregion
+
+    //region PESQUISAR ESPECIALIDADE
+    private static void pesquisarSintoma(Scanner ler) {
+        System.out.print("Nome do sintoma a pesquisar: ");
+        String nome = ler.nextLine();
+        Sintomas sintomas = ficheirosSintomas.procurarSintoma(nome);
+
+        if (sintomas != null) {
+            System.out.println(GREEN + "\nEncontrado: " + RESET);
+            System.out.println("Sintoma: " + sintomas.getNomeSintoma());
+            System.out.println("Nível: " + sintomas.getNivelSintoma().getNivel() + " (" + sintomas.getNivelSintoma().getCor() + ")");
+            if (sintomas.getEspecialidadesAssociadas() != null) {
+                System.out.println("Encaminhamento sugerido: " + sintomas.getEspecialidadesAssociadas().getNome());
+            }
+        } else {
+            System.out.println(RED + "Sintoma não encontrado." + RESET);
+        }
+        pressionarEnter(ler);
+    }
+    //endregion
+
+    //region REMOVER ESPECIALIDADE
+    private static void removerSintoma(Scanner ler) {
+        System.out.print("Nome do sintoma a remover: ");
+        String nome = ler.nextLine();
+        if (ficheirosSintomas.removerSintoma(nome)) {
+            System.out.println(GREEN + "Sintoma removido com sucesso." + RESET);
+        } else {
+            System.out.println(RED + "Sintoma não encontrado." + RESET);
+        }
+        pressionarEnter(ler);
+    }
+    //endregion
 
     private static void gerirHospital(Scanner ler) {
         System.out.println("\n--- Gestão do Hospital ---");

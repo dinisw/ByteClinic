@@ -1,0 +1,4 @@
+João Martins;40958;CARD;8;16;45
+Maria Silva;40959;PEDI;9;17;40
+António Ferreira;40960;ORTO;10;18;50
+Pedro Gomes;40961;CARD;12;20;47
