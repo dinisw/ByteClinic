@@ -1,15 +1,15 @@
 public class Sintomas {
     private String nomeSintoma;
-    private String cor;
-    private String[] especialidadesAssociadas;
+    private NivelSintoma nivelSintoma;
+    private Especialidades especialidadesAssociadas;
 
-    public Sintomas(String nomeSintoma, String cor, String especialidadesAssociadas) {
+    public Sintomas(String nomeSintoma, NivelSintoma nivelSintoma, Especialidades especialidadesAssociadas) {
         this.nomeSintoma = nomeSintoma;
-        this.cor = cor;
-        this.especialidadesAssociadas = new String[]{especialidadesAssociadas};
+        this.nivelSintoma = nivelSintoma;
+        this.especialidadesAssociadas = especialidadesAssociadas;
     }
 
-    public Sintomas(String nome, String cor, String[] especialidades) {
+    public Sintomas(String nome, String nivelSintoma, String[] especialidades) {
     }
 
     public String getNomeSintoma() {
@@ -20,39 +20,36 @@ public class Sintomas {
         this.nomeSintoma = nomeSintoma;
     }
 
-    public String getCor() {
-        return cor;
+    public NivelSintoma getNivelSintoma() {
+        return nivelSintoma;
     }
 
-    public void setCor(String cor) {
-        this.cor = cor;
+    public void setNivelSintoma(NivelSintoma nivelSintoma) {
+        this.nivelSintoma = nivelSintoma;
     }
 
-    public String[] getEspecialidadesAssociadas() {
+    public Especialidades getEspecialidadesAssociadas() {
         return especialidadesAssociadas;
     }
 
-    public void setEspecialidadesAssociadas(String especialidadesAssociadas) {
-        this.especialidadesAssociadas = new String[]{especialidadesAssociadas};
+    public void setEspecialidadesAssociadas(Especialidades especialidadesAssociadas) {
+        this.especialidadesAssociadas = especialidadesAssociadas;
     }
 
     @Override
     public String toString() {
         return "Sintomas{" +
                 "nomeSintoma='" + nomeSintoma + '\'' +
-                ", cor='" + cor + '\'' +
+                ", cor='" + nivelSintoma + '\'' +
                 ", especialidadesAssociadas='" + especialidadesAssociadas + '\'' +
                 '}';
     }
 
     public String paraFicheiro() {
-        String linha = nomeSintoma + ";" + cor;
+        String linha = nomeSintoma + ";" + nivelSintoma;
         if (especialidadesAssociadas != null) {
-            for (int i = 0; i < especialidadesAssociadas.length; i++) {
-                linha += ";" + especialidadesAssociadas[i];
-            }
+            linha += ";" + especialidadesAssociadas;
         }
-
         return linha;
     }
 }
