@@ -22,7 +22,9 @@ public class Main {
     private static final int LARGURA = 84;
     //endregion
 
-    public static void main(String[] args) {
+    public static final String PASSWORD = "admin123";
+
+    static void main(String[] args) {
         //Medico[] medicos = FicheiroMedicos.getMedicos(); //Ver como carregar os médicos pra cá
         //Medico[] sintomas = FicheirosSintomas.getMedicos(); //Ver como carregar os sintomas pra cá
         //Medico[] especialidades = FicheiroMedicos.getMedicos(); //Ver como especialidades os médicos pra cá
@@ -36,21 +38,24 @@ public class Main {
 
             switch (opcao) {
                 case "1":
-                    menuMedicos(ler);
+                    menuTriagem(ler);
                     break;
                 case "2":
-                    menuEspecialidades(ler);
+                    menuMedicos(ler);
                     break;
                 case "3":
-                    menuSintomas(ler);
+                    menuEspecialidades(ler);
                     break;
                 case "4":
-                    gerirHospital(ler);
+                    menuSintomas(ler);
                     break;
                 case "5":
-                    consultarEstatisticas(ler);
+                    gerirHospital(ler);
                     break;
                 case "6":
+                    consultarEstatisticas(ler);
+                    break;
+                case "7":
                     configuracoes(ler);
                     break;
                 case "0":
@@ -65,7 +70,6 @@ public class Main {
 
     }
 
-    public static final String PASSWORD = "admin123";
 
     public static void exibirTitulo() {
         System.out.print("\033[H\033[2J");
@@ -125,6 +129,170 @@ public class Main {
         }
         System.out.println(CYAN_BOLD + bordaInferior + RESET);
     }
+
+
+
+    //region MENU TRIAGEM
+    private static void menuTriagem(Scanner ler) {
+        String opcao = "";
+
+        do {
+            System.out.println("\033[H\033[2J");
+            System.out.flush();
+
+            String bordaSuperior = "╔" + "═".repeat(LARGURA) + "╗";
+            String bordaMeio = "╠" + "═".repeat(LARGURA) + "╣";
+            String bordaInferior = "╚" + "═".repeat(LARGURA) + "╝";
+
+            String titulo = "TRIAGEM";
+            int paddingTitulo = (LARGURA - titulo.length()) / 2;
+            String textoTitulo = String.format("%" + paddingTitulo + "s%s%-" + paddingTitulo + "s", "", titulo, "");
+            if (textoTitulo.length() < LARGURA) textoTitulo += " ";
+
+            System.out.println(CYAN_BOLD + bordaSuperior + RESET);
+            System.out.println(CYAN_BOLD + "║" + WHITE_BOLD + textoTitulo + CYAN_BOLD + "║" + RESET);
+            System.out.println(CYAN_BOLD + bordaMeio + RESET);
+
+            String[] opcoes = {
+                    "1. Registar Novo Médico",
+                    "2. Listar Todos os Médicos (Status)",
+                    "3. Pesquisar Médico (por Cédula)",
+                    "4. Atualizar Dados de Médico",
+                    "5. Remover Médico",
+                    "6. Verificar Disponibilidade por Especialidade",
+                    "0. Sair"
+            };
+
+            for (String opcao2 : opcoes) {
+                System.out.println(CYAN_BOLD + "║ " + RESET + String.format("%-" + (LARGURA - 1) + "s", opcao2) + CYAN_BOLD + "║" + RESET);
+            }
+            System.out.println(CYAN_BOLD + bordaInferior + RESET);
+
+            System.out.print("\n" + WHITE_BOLD + "Selecione uma opção: " + RESET);
+            opcao = ler.nextLine();
+
+            switch (opcao) {
+                case "1":
+                    registarTriagem(ler);
+                    break;
+                case "2":
+                    listarMedicos(ler);
+                    break;
+                case "3":
+                    pesquisarMedico(ler);
+                    break;
+                case "4":
+                    atualizarMedico(ler);
+                    break;
+                case "5":
+                    removerMedico(ler);
+                    break;
+                case "6":
+                    listarPorEspecialidade(ler);
+                    break;
+                case "0":
+                    break;
+                default:
+                    System.out.println("\n" + RED + "Opção inválida! Tente novamente." + RESET);
+                    pressionarEnter(ler);
+            }
+        } while (!opcao.equals("0"));
+    }
+    //endregion
+
+    //region TRIAGEM
+    private static void registarTriagem(Scanner ler) {
+        System.out.println("\n" + CYAN_BOLD + "--- TRIAGEM---" + RESET);
+        try {
+            System.out.print("Nome: ");
+            String nome = ler.nextLine();
+            String opcao = "";
+            String[] sintomaEscolhido = new String [100];
+            Sintomas[] sintomasDisponiveis = ficheirosSintomas.getSintomas();
+            Sintomas sintomasEscolhidos = new Sintomas();
+            int qtdSelecionados = 0;
+
+            do {
+                int count = 1;
+                System.out.println("\n--- SINTOMAS ---");
+                for (Sintomas sintoma : sintomasDisponiveis) {
+                    System.out.printf("%d - %s\n", count, sintoma);
+                    count++;
+                }
+                System.out.println("------------------------");
+                System.out.println("Digite o sintoma.");
+                System.out.print("Sua escolha (ou 'sair'): ");
+
+                opcao = ler.nextLine().trim();
+
+                if (opcao.equalsIgnoreCase("sair")) {
+                    break;
+                }
+//                else if (opcao.equalsIgnoreCase("novo")) {
+//                    registarSintomas(ler);
+//                }
+
+
+
+                String[] partes = opcao.split("[,\\s]+");
+
+                for (String parte : partes) {
+                    try {
+                        int indice = Integer.parseInt(parte) - 1;
+
+                        if (indice >= 0 && indice < sintomasDisponiveis.length) {
+                            Sintomas sintoma = sintomasDisponiveis[indice];
+
+                            boolean jaExiste = false;
+//                            for(int i = 0; i < qtdSelecionados; i++) {
+//                                if(sintomasEscolhidos[i].equals(sintoma.getNomeSintoma())){
+//                                    jaExiste = true;
+//                                    break;
+//                                }
+//                            }
+//
+//                            if (!jaExiste) {
+//                                sintomasEscolhidos[qtdSelecionados] = sintoma.getNomeSintoma();
+//                                qtdSelecionados++;
+//                                System.out.println("Adicionado: " + sintoma);
+//                            }
+
+                        } else {
+                            // Ignora silenciosamente ou avisa números fora do range
+                        }
+
+                    } catch (NumberFormatException e) {
+                        // Ignora letras/lixo
+                    }
+                }
+
+                if (qtdSelecionados > 0) {
+                    System.out.println("\nDeseja finalizar? (digite 'sair' para parar ou Enter para adicionar mais)");
+                    if(ler.nextLine().equalsIgnoreCase("sair")) break;
+                }
+
+            } while (true);
+
+            //sintomasEscolhidos
+
+
+            System.out.print("[ ");
+            for (int i = 0; i < qtdSelecionados; i++) {
+                //System.out.print(sintomasEscolhidos[i]);
+                if(i < qtdSelecionados - 1) System.out.print(", ");
+            }
+            System.out.println(" ]");
+
+            //Medico medico = new Medico(nome,cedula,especialidade,horaEntrada,horaSaida,salario);
+            //ficheiroMedicos.adicionarMedico(medico);
+            System.out.println(GREEN + "Médico registado com sucesso!" + RESET);
+        } catch (NumberFormatException e) {
+            System.out.println(RED + "Erro: Introduza números válidos." + RESET);
+        }
+        addHora();
+        pressionarEnter(ler);
+    }
+    //endregion
 
     //region MENU MEDICO
     private static void menuMedicos(Scanner ler) {
@@ -556,7 +724,7 @@ public class Main {
         } else {
 
             System.out.println("\nSelecione o Nível de Urgência (Cor da Pulseira):");
-            NivelSintoma[] nivelSintomas = NivelSintoma.values();
+            NivelSintomas[] nivelSintomas = NivelSintomas.values();
 
             for (int i = 0; i < nivelSintomas.length; i++) {
                 System.out.printf("%d - %s (%s)", (i + 1), nivelSintomas[i].getCor(), nivelSintomas[i].getNivel());
@@ -573,7 +741,7 @@ public class Main {
                 pressionarEnter(ler);
                 return;
             }
-            NivelSintoma opcaoSelecionado = nivelSintomas[opcao -1];
+            NivelSintomas opcaoSelecionado = nivelSintomas[opcao -1];
             System.out.println("\nAssociar a qual a especialidade? (Sigla)");
             for (Especialidades especialidade : Especialidades.values()) {
                 System.out.println(especialidade.getCodigo() + " ");
@@ -593,7 +761,7 @@ public class Main {
                 System.out.println(YELLOW + "Erro: Sigla não encontrada no sistema. Será registado sem especialidade automática." + RESET);
             }
             Sintomas sintomas = new Sintomas(nome,opcaoSelecionado,especialidades);
-            ficheirosSintomas.adicionarSintoma(novoSintoma);
+            ficheirosSintomas.adicionarSintoma(sintomas);
 
             System.out.println(GREEN + "Sintoma registado com sucesso!" + RESET);
             pressionarEnter(ler);
@@ -614,9 +782,9 @@ public class Main {
             for (Sintomas sintomas : lista) {
                 if (sintomas != null) {
                     String corTexto = RESET;
-                    if (sintomas.getNivelSintoma() == NivelSintoma.VERMELHO) corTexto = RED;
-                    else if (sintomas.getNivelSintoma() == NivelSintoma.LARANJA) corTexto = YELLOW;
-                    else if (sintomas.getNivelSintoma() == NivelSintoma.VERDE) corTexto = GREEN;
+                    if (sintomas.getNivelSintoma() == NivelSintomas.VERMELHO) corTexto = RED;
+                    else if (sintomas.getNivelSintoma() == NivelSintomas.LARANJA) corTexto = YELLOW;
+                    else if (sintomas.getNivelSintoma() == NivelSintomas.VERDE) corTexto = GREEN;
 
                     String nomeEspecialidade = (sintomas.getEspecialidadesAssociadas() != null) ? sintomas.getEspecialidadesAssociadas().getNome() : "---";
 
@@ -693,5 +861,10 @@ public class Main {
     private static void pressionarEnter(Scanner ler) {
         System.out.print("\nPressione " + WHITE_BOLD + "ENTER" + RESET + " para voltar ao menu...");
         ler.nextLine();
+    }
+
+    private static void addHora(){
+        if(hora == 23) hora = 0;
+        else hora++;
     }
 }

@@ -124,22 +124,25 @@ public class FicheiroMedicos {
 
     //region REMOVER MEDICO
     public boolean removerMedico(int cedula) {
-        int contador = -1;
+        int contador = 0;
         for (int i = 0; i < totalMedicos; i++) {
             if (listaMedicos[i].getCedulaProfissional() == cedula) {
                 contador = i;
                 break;
             }
         }
+<<<<<<< HEAD
         for (int i = contador; i < totalMedicos - 1; i++) {
             listaMedicos[i] = listaMedicos[i + 1];
+=======
+        for (int i = 0; i < totalMedicos - 1; i++) {
+            listaMedicos[totalMedicos - 1] = null;
+            totalMedicos--;
+>>>>>>> main
         }
-        listaMedicos[totalMedicos - 1] = null;
-        totalMedicos--;
         return true;
     }
     //endregion
-
     //region ATUALIZAR MEDICO
     public boolean atualizarMedico(int cedula, String novoNomeMedico, String novaEspecialidade, int novaHoraEntrada, int novaHoraSaida, int novoSalarioHora) {
         Medico medico = procurarMedicoPorCedula(cedula);
@@ -162,5 +165,3 @@ public class FicheiroMedicos {
         return totalMedicos;
     }
 }
-
-

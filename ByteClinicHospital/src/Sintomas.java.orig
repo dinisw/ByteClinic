@@ -12,9 +12,6 @@ public class Sintomas {
     public Sintomas(String nome, String nivelSintoma, String[] especialidades) {
     }
 
-    public Sintomas() {
-    }
-
     public String getNomeSintoma() {
         return nomeSintoma;
     }
@@ -49,7 +46,11 @@ public class Sintomas {
     }
 
     public String paraFicheiro() {
-        String linha = nomeSintoma + ";" + nivelSintomas.name();
+<<<<<<< HEAD
+        String linha = nomeSintoma + ";" + nivelSintomas;
+=======
+        String linha = nomeSintoma + ";" + nivelSintoma.name();
+>>>>>>> main
         if (especialidadesAssociadas != null) {
             linha += ";" + especialidadesAssociadas.getCodigo();
         } else {

@@ -1,4 +1,4 @@
-public enum NivelSintoma {
+public enum NivelSintomas {
     VERDE("Baixo", "Verde"),
     LARANJA("Medio", "Laranja"),
     VERMELHO("Urgente", "Vermelho");
@@ -6,7 +6,7 @@ public enum NivelSintoma {
     private final String nivel;
     private final String cor;
 
-    NivelSintoma(String nivel, String cor) {
+    NivelSintomas(String nivel, String cor) {
         this.nivel = nivel;
         this.cor = cor;
     }
