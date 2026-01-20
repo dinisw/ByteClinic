@@ -1,16 +1,35 @@
 public class Medico {
     private String nomeMedico;
+    private int cedulaProfissional;
     private String especialidade;
     private int horaEntrada;
     private int horaSaida;
     private double salarioHora;
+    private boolean ocupado;
+    private int totalPacientesAtendidos;
 
-    public Medico(String nomeMedico, String especialidade, int horaEntrada, int horaSaida, double salarioHora) {
+    public Medico(String nomeMedico,int cedulaProfissional, String especialidade, int horaEntrada, int horaSaida, double salarioHora) {
         this.nomeMedico = nomeMedico;
+        this.cedulaProfissional = cedulaProfissional;
         this.especialidade = especialidade;
         this.horaEntrada = horaEntrada;
         this.horaSaida = horaSaida;
         this.salarioHora = salarioHora;
+        this.ocupado = false;
+        this.totalPacientesAtendidos = 0;
+    }
+
+    public void inicioAtendimento() {
+        this.ocupado = true;
+        this.totalPacientesAtendidos++;
+    }
+
+    public void terminarAtendimento() {
+        this.ocupado = false;
+    }
+
+    public boolean isDisponivel(int horaAtual) {
+        return (horaAtual >= horaEntrada && horaAtual < horaSaida) && !ocupado;
     }
 
     public String getNomeMedico() {
@@ -19,6 +38,14 @@ public class Medico {
 
     public void setNomeMedico(String nomeMedico) {
         this.nomeMedico = nomeMedico;
+    }
+
+    public int getCedulaProfissional() {
+        return cedulaProfissional;
+    }
+
+    public void setCedulaProfissional(int cedulaProfissional) {
+        this.cedulaProfissional = cedulaProfissional;
     }
 
     public String getEspecialidade() {
@@ -51,5 +78,24 @@ public class Medico {
 
     public void setSalarioHora(double salarioHora) {
         this.salarioHora = salarioHora;
+    }
+
+    public boolean isOcupado() {
+        return ocupado;
+    }
+
+    public int getTotalPacientesAtendidos() {
+        return totalPacientesAtendidos;
+    }
+
+    public void setTotalPacientesAtendidos(int totalPacientesAtendidos) {
+        this.totalPacientesAtendidos = totalPacientesAtendidos;
+    }
+
+    @Override
+    public String toString() {
+        String estado = ocupado ? "OCUPADO" : "LIVRE";
+        return String.format("Dr(a). %s [Cédula: %d] | %s | %dh-%dh | Status: %s",
+                nomeMedico, cedulaProfissional, especialidade, horaEntrada, horaSaida, estado);
     }
 }
