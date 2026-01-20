@@ -8,9 +8,9 @@ public class FicheiroMedicos {
 
     public FicheiroMedicos() {
         this.listaMedicos = new Medico[10];
-        this.totalMedicos = 3;
+        this.totalMedicos = 0;
     }
-
+    //region CARREGAR FICHEIRO
     public void carregarFicheiro(String medicos) {
         File ficheiro = new File("medicos.txt");
         if (!ficheiro.exists()) {
@@ -23,29 +23,57 @@ public class FicheiroMedicos {
                 String linha = ler.nextLine();
                 if (linha.trim().isEmpty()) continue;
                 String[] dados = linha.split(";");
-                if (dados.length >= 4) {
+                if (dados.length >= 6) {
                     String nomeMedico = dados[0];
-                    String especialidade = dados[1];
-                    int horaEntrada = Integer.parseInt(dados[2]);
-                    int horaSaida = Integer.parseInt(dados[3]);
-                    double salarioHora = Double.parseDouble(dados[4]);
-                    Medico medico = new Medico(nomeMedico, especialidade, horaEntrada, horaSaida, salarioHora);
+                    int cedula  = Integer.parseInt(dados[1]);
+                    String especialidade = dados[2];
+                    int horaEntrada = Integer.parseInt(dados[3]);
+                    int horaSaida = Integer.parseInt(dados[4]);
+                    double salarioHora = Double.parseDouble(dados[5].replace(";","."));
+                    Medico medico = new Medico(nomeMedico,cedula, especialidade, horaEntrada, horaSaida, salarioHora);
                     adicionarMedico(medico);
                 }
             }
+            System.out.println("Médicos carregados: " + totalMedicos);
         } catch (FileNotFoundException e) {
             System.out.println("Erro ao carregar o ficheiro" + e.getMessage());
         }
     }
+    //endregion
 
+    //region GUARDAR FICHEIRO
+    public void guardarFicheiroMedico(String medicos) {
+        try {
+            Formatter formatter = new Formatter(new FileWriter(medicos));
+            for (int i = 0; i < totalMedicos; i++) {
+                Medico medico = listaMedicos[i];
+                formatter.format("%s;%d;%s;%d;%d;%.2f;%d%n",
+                        medico.getNomeMedico(),
+                        medico.getCedulaProfissional(),
+                        medico.getEspecialidade(),
+                        medico.getHoraEntrada(),
+                        medico.getHoraSaida(),
+                        medico.getSalarioHora(),
+                        medico.getTotalPacientesAtendidos());
+
+            }
+            System.out.println("Ficheiro guardado com sucesso.");
+        } catch (IOException ex) {
+            System.out.println("Erro ao guardar ficheiro" + ex.getMessage());
+        }
+    }
+    //endregion
+
+    //region ADICIONAR MEDICO
     public void adicionarMedico(Medico medico) {
         if (totalMedicos == listaMedicos.length) {
             expandirArray();
         }
-        listaMedicos[totalMedicos] = medico;
-        totalMedicos++;
+        listaMedicos[totalMedicos++] = medico;
     }
+    //endregion
 
+    //region EXPANDIR ARRAY
     public void expandirArray() {
         Medico[] expandir = new Medico[listaMedicos.length * 2];
         for (int i = 0; i < totalMedicos; i++) {
@@ -54,17 +82,38 @@ public class FicheiroMedicos {
         this.listaMedicos = expandir;
         System.out.println("Array redimensionado para: " + listaMedicos.length);
     }
+    //endregion
+
+    //region CEDULA
+    public Medico procurarMedicoPorCedula(int cedula) {
+        for ( int i = 0; i < totalMedicos; i++) {
+            if ( listaMedicos[i].getCedulaProfissional() == cedula) {
+                return listaMedicos[i];
+            }
+        }
+        return null;
+    }
+    //endregion
+
+    //region GET MEDICOS
     public Medico[] getMedicos() {
         if (listaMedicos.length > 0) return listaMedicos;
         else return null;
     }
-    public Medico procurarMedicoPorNome(String medicos) {
+    //endregion
+
+    //region PROCURAR MEDICO POR CEDULA
+    public Medico procuraMedicoCedula (int cedula) {
         for (int i = 0; i < totalMedicos; i++) {
-            if (listaMedicos[i].getNomeMedico().equalsIgnoreCase(medicos)) return listaMedicos[i];
+            if (listaMedicos[i].getCedulaProfissional() == cedula) {
+                return listaMedicos[i];
+            }
         }
         return null;
     }
+    //endregion
 
+    //region PROCURAR MEDICO POR ESPECIALIADE
     public Medico[] procurarMedicoPorEspecialidade(String especialidade) {
         int contador = 0;
         for (int i = 0; i < totalMedicos; i++) {
@@ -72,6 +121,7 @@ public class FicheiroMedicos {
                 contador++;
             }
         }
+        if (contador == 0) return null;
         Medico[] especialidadeMedico = new Medico[contador];
         int index = 0;
         for (int i = 0; i < totalMedicos; i++) {
@@ -81,11 +131,13 @@ public class FicheiroMedicos {
         }
         return especialidadeMedico;
     }
+    //endregion
 
-    public boolean removerMedico(String medicos) {
+    //region REMOVER MEDICO
+    public boolean removerMedico(int cedula) {
         int contador = -1;
         for (int i = 0; i < totalMedicos; i++) {
-            if (listaMedicos[i].getNomeMedico().equalsIgnoreCase(medicos)) {
+            if (listaMedicos[i].getCedulaProfissional() == cedula) {
                 contador = i;
                 break;
             }
@@ -97,36 +149,27 @@ public class FicheiroMedicos {
         totalMedicos--;
         return true;
     }
+    //endregion
 
-    public void guardaFicheiroMedico(String ficheiro) {
-        try {
-            Formatter out = new Formatter(new FileWriter("medicos.txt"));
-            for (int i = 0; i < totalMedicos; i++) {
-                Medico medico = listaMedicos[i];
-                out.format("%s;%s;%d;%d;%.2f%n",
-                        medico.getNomeMedico(),
-                        medico.getEspecialidade(),
-                        medico.getHoraEntrada(),
-                        medico.getHoraSaida(),
-                        medico.getSalarioHora());
-            }
-            out.close();
-            System.out.println("Ficheiro guardado com sucesso!");
-        } catch (IOException ex) {
-            System.out.println("Erro ao carregar o ficheiro" + ex.getMessage());
-        }
-    }
-
-    public boolean atualizarMedico(String nomeMedico, String especialidade, int horaEntrada, int horaSaida, double salarioHora) {
-        Medico medico = procurarMedicoPorNome(nomeMedico);
+    //region ATUALIZAR MEDICO
+    public boolean atualizarMedico(int cedula, String novoNomeMedico, String novaEspecialidade, int novaHoraEntrada, int novaHoraSaida, double novoSalarioHora) {
+        Medico medico = procurarMedicoPorCedula(cedula);
         if (medico != null) {
-            medico.setEspecialidade(especialidade);
-            medico.setHoraEntrada(horaEntrada);
-            medico.setHoraSaida(horaSaida);
-            medico.setSalarioHora(salarioHora);
-            System.out.println("Medico atualizado com sucesso!");
+            medico.setNomeMedico(novoNomeMedico);
+            medico.setEspecialidade(novaEspecialidade);
+            medico.setHoraEntrada(novaHoraEntrada);
+            medico.setHoraSaida(novaHoraSaida);
+            medico.setSalarioHora(novoSalarioHora);
             return true;
         }
         return false;
+    }
+    //endregion\
+
+    public  Medico[] getListaMedicos() {
+        return listaMedicos;
+    }
+    public int getTotalMedicos() {
+        return totalMedicos;
     }
 }
