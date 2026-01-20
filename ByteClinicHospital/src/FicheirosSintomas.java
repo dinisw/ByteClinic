@@ -99,4 +99,13 @@ public class FicheirosSintomas {
         }
         return null;
     }
+
+    public boolean atualuzarSintoma(String nomeSintoma, String corPulseira) {
+        Sintomas sintomas = procurarSintoma(nomeSintoma);
+        if(sintomas != null) {
+            sintomas.setCor(corPulseira);
+            return true;
+        }
+        return false;
+    }
 }
