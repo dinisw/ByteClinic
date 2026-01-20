@@ -196,6 +196,7 @@ public class Main {
 
     //region REGISTAR MEDICO
     private static void registarMedico(Scanner ler) {
+        ficheiroMedicos.carregarFicheiro("medicos.txt");
         System.out.println("\n" + CYAN_BOLD + "--- REGISTAR MÉDICO ---" + RESET);
         try {
             System.out.print("Nome: ");
@@ -216,10 +217,11 @@ public class Main {
             System.out.print("Hora Saída (0-23): ");
             int horaSaida = Integer.parseInt(ler.nextLine());
             System.out.println("Salário Hora: ");
-            double salario = Double.parseDouble(ler.nextLine().replace(",", "."));
-
-            Medico medico = new Medico(nome,cedula,especialidade,horaEntrada,horaSaida,salario);
-            ficheiroMedicos.adicionarMedico(medico);
+            int salario = Integer.parseInt(ler.nextLine());
+            ler.nextLine();
+            Medico medicos = new Medico(nome,cedula,especialidade,horaEntrada,horaSaida, salario);
+            ficheiroMedicos.adicionarMedico(medicos);
+            ficheiroMedicos.guardarFicheiroMedico(medicos, "medicos.txt");
             System.out.println(GREEN + "Médico registado com sucesso!" + RESET);
         } catch (NumberFormatException e) {
             System.out.println(RED + "Erro: Introduza números válidos." + RESET);
@@ -231,6 +233,7 @@ public class Main {
     //region LISTAR MEDICO
     private static void listarMedicos(Scanner ler) {
         System.out.println("\n" + CYAN_BOLD + "--- EQUIPA MÉDICA ---" + RESET);
+        ficheiroMedicos.carregarFicheiro("medicos.txt");
         Medico[] lista = ficheiroMedicos.getListaMedicos();
         int total = ficheiroMedicos.getTotalMedicos();
         int horaAtual = LocalDateTime.now().getHour();
@@ -292,7 +295,7 @@ public class Main {
         System.out.print("Nova Especialidade: "); String especialidade = ler.nextLine();
         System.out.print("Nova Entrada: "); int entrada = Integer.parseInt(ler.nextLine());
         System.out.print("Nova Saída: "); int saida= Integer.parseInt(ler.nextLine());
-        System.out.print("Novo Salário: "); double salario = Double.parseDouble(ler.nextLine().replace(",", "."));
+        System.out.print("Novo Salário: "); int salario = Integer.parseInt(ler.nextLine());
 
         ficheiroMedicos.atualizarMedico(cedula,nome,especialidade,entrada,saida,salario);
         System.out.println(GREEN + "Atualizado com sucesso" + RESET);
@@ -301,6 +304,7 @@ public class Main {
 
     //region REMOVER MEDICO
     private static void removerMedico(Scanner ler) {
+        ficheiroMedicos.carregarFicheiro("medicos.txt");
         System.out.print("Cédula a remover: ");
         int cedula = Integer.parseInt(ler.nextLine());
         if (ficheiroMedicos.removerMedico(cedula)) {
