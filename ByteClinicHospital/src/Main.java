@@ -9,6 +9,8 @@ public class Main {
     private static FicheirosSintomas ficheirosSintomas = new FicheirosSintomas();
     private static FicheiroUtentes ficheiroUtentes = new FicheiroUtentes();
 
+    private static int hora = 0;
+
     //Design
     public static final String RESET = "\033[0m";
     public static final String CYAN_BOLD = "\033[1;36m";
