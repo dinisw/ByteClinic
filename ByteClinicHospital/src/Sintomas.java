@@ -46,9 +46,11 @@ public class Sintomas {
     }
 
     public String paraFicheiro() {
-        String linha = nomeSintoma + ";" + nivelSintoma;
+        String linha = nomeSintoma + ";" + nivelSintoma.name();
         if (especialidadesAssociadas != null) {
-            linha += ";" + especialidadesAssociadas;
+            linha += ";" + especialidadesAssociadas.getCodigo();
+        } else {
+            linha += ";NA";
         }
         return linha;
     }
