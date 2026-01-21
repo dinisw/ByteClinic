@@ -25,6 +25,7 @@ public class Main {
     public static final String PASSWORD = "admin123";
 
     static void main(String[] args) {
+        ficheiroMedicos.carregarFicheiro("medicos.txt");
         //Medico[] medicos = FicheiroMedicos.getMedicos(); //Ver como carregar os médicos pra cá
         //Medico[] sintomas = FicheirosSintomas.getMedicos(); //Ver como carregar os sintomas pra cá
         //Medico[] especialidades = FicheiroMedicos.getMedicos(); //Ver como especialidades os médicos pra cá
@@ -121,12 +122,13 @@ public class Main {
         System.out.println(CYAN_BOLD + bordaMeio + RESET);
 
         String[] opcoes = {
-                "1. Médicos",
-                "2. Especialidades",
-                "3. Sintomas",
-                "4. Gerir o funcionamento do hospital",
-                "5. Consultar estatísticas e logs",
-                "6. Configurações",
+                "1. Triagem",
+                "2. Medicos",
+                "3. Especialidades",
+                "4. Sintomas",
+                "5. Gerir o funcionamento do hospital",
+                "6. Consultar estatísticas e logs",
+                "7. Configurações",
                 "0. Sair"
         };
 
@@ -368,7 +370,6 @@ public class Main {
 
     //region REGISTAR MEDICO
     private static void registarMedico(Scanner ler) {
-        ficheiroMedicos.carregarFicheiro("medicos.txt");
         System.out.println("\n" + CYAN_BOLD + "--- REGISTAR MÉDICO ---" + RESET);
         try {
             System.out.print("Nome: ");
@@ -411,7 +412,6 @@ public class Main {
     //region LISTAR MEDICO
     private static void listarMedicos(Scanner ler) {
         System.out.println("\n" + CYAN_BOLD + "--- EQUIPA MÉDICA ---" + RESET);
-        ficheiroMedicos.carregarFicheiro("medicos.txt");
         Medico[] lista = ficheiroMedicos.getListaMedicos();
         int total = ficheiroMedicos.getTotalMedicos();
         int horaAtual = LocalDateTime.now().getHour();
@@ -482,7 +482,6 @@ public class Main {
 
     //region REMOVER MEDICO
     private static void removerMedico(Scanner ler) {
-        ficheiroMedicos.carregarFicheiro("medicos.txt");
         System.out.print("Cédula a remover: ");
         int cedula = Integer.parseInt(ler.nextLine());
         if (ficheiroMedicos.removerMedico(cedula)) {
