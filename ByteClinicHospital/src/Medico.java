@@ -4,11 +4,11 @@ public class Medico {
     private String especialidade;
     private int horaEntrada;
     private int horaSaida;
-    private int salarioHora;
+    private double salarioHora;
     private boolean ocupado;
     private int totalPacientesAtendidos;
 
-    public Medico(String nomeMedico,int cedulaProfissional, String especialidade, int horaEntrada, int horaSaida, int salarioHora) {
+    public Medico(String nomeMedico,int cedulaProfissional, String especialidade, int horaEntrada, int horaSaida, double salarioHora) {
         this.nomeMedico = nomeMedico;
         this.cedulaProfissional = cedulaProfissional;
         this.especialidade = especialidade;
@@ -76,7 +76,7 @@ public class Medico {
         return salarioHora;
     }
 
-    public void setSalarioHora(int salarioHora) {
+    public void setSalarioHora(double salarioHora) {
         this.salarioHora = salarioHora;
     }
 
