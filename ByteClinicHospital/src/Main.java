@@ -9,6 +9,11 @@ public class Main {
     private static FicheirosSintomas ficheirosSintomas = new FicheirosSintomas();
     private static FicheiroUtentes ficheiroUtentes = new FicheiroUtentes();
 
+
+    private static Medico[] medicos = ficheiroMedicos.getMedicos();
+
+    private static String sep = ";";
+
     private static int hora = 0;
 
     //Design
@@ -32,7 +37,7 @@ public class Main {
 
         ficheiroMedicos.carregarFicheiro("medicos.txt");
         ficheiroEspecialidade.carregarFicheiro("especialidade.txt");
-        ficheirosSintomas.carregarSintomas();
+        ficheirosSintomas.carregarSintomas(sep);
 
 
         Scanner ler = new Scanner(System.in);
@@ -226,7 +231,7 @@ public class Main {
                     count++;
                 }
                 System.out.println("------------------------");
-                System.out.println("Digite o sintoma.");
+                System.out.println("Digite o número do sintoma. Caso não apareça na lista, digite 'novo'");
                 System.out.print("Sua escolha (ou 'sair'): ");
 
                 opcao = ler.nextLine().trim();
@@ -234,9 +239,9 @@ public class Main {
                 if (opcao.equalsIgnoreCase("sair")) {
                     break;
                 }
-//                else if (opcao.equalsIgnoreCase("novo")) {
-//                    registarSintomas(ler);
-//                }
+                else if (opcao.equalsIgnoreCase("novo")) {
+                    registarSintomas(ler);
+                }
 
 
 
@@ -937,5 +942,12 @@ public class Main {
     private static void addHora(){
         if(hora == 23) hora = 0;
         else hora++;
+
+        for (var medico : medicos){
+            medico.addHoraMedico();
+        }
+        //addHoraUtente()
+
     }
+
 }
