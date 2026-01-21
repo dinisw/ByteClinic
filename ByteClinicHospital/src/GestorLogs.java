@@ -41,7 +41,7 @@ public class GestorLogs {
             while (scanner.hasNextLine()) {
                 String linha = scanner.nextLine();
                 if (linha.contains("[ERRO]")) {
-                    System.out.println(System.out.println("\033[0;31m" + linha + "\033[0m");
+                    System.out.println("\033[0;31m" + linha + "\033[0m");
                 } else {
                     System.out.println(linha);
                 }
