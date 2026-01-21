@@ -30,7 +30,6 @@ public class Main {
     public static final String PASSWORD = "admin123";
 
     static void main(String[] args) {
-        ficheiroMedicos.carregarFicheiro("medicos.txt");
         //Medico[] medicos = FicheiroMedicos.getMedicos(); //Ver como carregar os médicos pra cá
         //Medico[] sintomas = FicheirosSintomas.getMedicos(); //Ver como carregar os sintomas pra cá
         //Medico[] especialidades = FicheiroMedicos.getMedicos(); //Ver como especialidades os médicos pra cá
@@ -218,7 +217,7 @@ public class Main {
             System.out.print("Nome: ");
             String nome = ler.nextLine();
             String opcao = "";
-            String[] sintomaEscolhido = new String [100];
+            String[] sintomaEscolhido = new String[100];
             Sintomas[] sintomasDisponiveis = ficheirosSintomas.getSintomas();
             Sintomas sintomasEscolhidos = new Sintomas();
             int qtdSelecionados = 0;
@@ -242,7 +241,6 @@ public class Main {
                 else if (opcao.equalsIgnoreCase("novo")) {
                     registarSintomas(ler);
                 }
-
 
 
                 String[] partes = opcao.split("[,\\s]+");
@@ -279,7 +277,7 @@ public class Main {
 
                 if (qtdSelecionados > 0) {
                     System.out.println("\nDeseja finalizar? (digite 'sair' para parar ou Enter para adicionar mais)");
-                    if(ler.nextLine().equalsIgnoreCase("sair")) break;
+                    if (ler.nextLine().equalsIgnoreCase("sair")) break;
                 }
 
             } while (true);
@@ -290,7 +288,7 @@ public class Main {
             System.out.print("[ ");
             for (int i = 0; i < qtdSelecionados; i++) {
                 //System.out.print(sintomasEscolhidos[i]);
-                if(i < qtdSelecionados - 1) System.out.print(", ");
+                if (i < qtdSelecionados - 1) System.out.print(", ");
             }
             System.out.println(" ]");
 
@@ -397,10 +395,9 @@ public class Main {
             System.out.println("Salário Hora: ");
             int salario = Integer.parseInt(ler.nextLine());
             ler.nextLine();
-            Medico medicos = new Medico(nome,cedula,especialidade,horaEntrada,horaSaida, salario);
+            Medico medicos = new Medico(nome, cedula, especialidade, horaEntrada, horaSaida, salario);
             ficheiroMedicos.adicionarMedico(medicos);
-            ficheiroMedicos.guardarFicheiroMedico(medicos, "medicos.txt");
-
+            ficheiroMedicos.guardarFicheiroMedico("medicos.txt");
             System.out.println(GREEN + "Médico registado!" + RESET);
             GestorLogs.registarSucesso("Novo Médico registado: " + nome + " (Cédula: " + cedula + ")");
         } catch (NumberFormatException e) {
@@ -425,21 +422,21 @@ public class Main {
         else {
             System.out.printf("%-10s %-20s %-10s %-15s %s\n", "CÉDULA", "NOME", "ESP.", "HORÁRIO", "ESTADO");
             System.out.println("-------------------------------------------------------------------------");
-            for (int i=0 ; i<total; i++) {
+            for (int i = 0; i < total; i++) {
                 Medico medico = lista[i];
-                        String estadoStr;
-                        if (medico.isOcupado()) {
-                            estadoStr = RED + "OCUPADO" + RESET;
-                        } else if (horaAtual >= medico.getHoraEntrada() && horaAtual < medico.getHoraSaida()) {
-                            estadoStr = GREEN + "LIVRE" + RESET;
-                        } else {
-                            estadoStr = YELLOW + "AUSENTE" + RESET;
-                        }
+                String estadoStr;
+                if (medico.isOcupado()) {
+                    estadoStr = RED + "OCUPADO" + RESET;
+                } else if (horaAtual >= medico.getHoraEntrada() && horaAtual < medico.getHoraSaida()) {
+                    estadoStr = GREEN + "LIVRE" + RESET;
+                } else {
+                    estadoStr = YELLOW + "AUSENTE" + RESET;
+                }
 
-                        System.out.printf("%-10d %-20s %-10s %02dh-%02dh       %s\n",
-                                medico.getCedulaProfissional(), medico.getNomeMedico(), medico.getEspecialidade(), medico.getHoraEntrada(), medico.getHoraSaida(), estadoStr);
+                System.out.printf("%-10d %-20s %-10s %02dh-%02dh       %s\n",
+                        medico.getCedulaProfissional(), medico.getNomeMedico(), medico.getEspecialidade(), medico.getHoraEntrada(), medico.getHoraSaida(), estadoStr);
             }
-        pressionarEnter(ler);
+            pressionarEnter(ler);
         }
     }
     //endregion
@@ -461,7 +458,7 @@ public class Main {
         } catch (Exception e) {
             System.out.println(RED + "Erro no input." + RESET);
         }
-            pressionarEnter(ler);
+        pressionarEnter(ler);
     }
     //endregion
 
@@ -474,13 +471,18 @@ public class Main {
             System.out.println(RED + "Não Existe." + RESET);
             return;
         }
-        System.out.print("Novo Nome: "); String nome = ler.nextLine();
-        System.out.print("Nova Especialidade: "); String especialidade = ler.nextLine();
-        System.out.print("Nova Entrada: "); int entrada = Integer.parseInt(ler.nextLine());
-        System.out.print("Nova Saída: "); int saida= Integer.parseInt(ler.nextLine());
-        System.out.print("Novo Salário: "); int salario = Integer.parseInt(ler.nextLine());
+        System.out.print("Novo Nome: ");
+        String nome = ler.nextLine();
+        System.out.print("Nova Especialidade: ");
+        String especialidade = ler.nextLine();
+        System.out.print("Nova Entrada: ");
+        int entrada = Integer.parseInt(ler.nextLine());
+        System.out.print("Nova Saída: ");
+        int saida = Integer.parseInt(ler.nextLine());
+        System.out.print("Novo Salário: ");
+        int salario = Integer.parseInt(ler.nextLine());
 
-        ficheiroMedicos.atualizarMedico(cedula,nome,especialidade,entrada,saida,salario);
+        ficheiroMedicos.atualizarMedico(cedula, nome, especialidade, entrada, saida, salario);
         System.out.println(GREEN + "Atualizado com sucesso" + RESET);
     }
     //endregion
@@ -501,9 +503,7 @@ public class Main {
     private static void listarPorEspecialidade(Scanner ler) {
         System.out.print("Qual a especialidade? ");
         String especialidade = ler.nextLine();
-
         Medico[] lista = ficheiroMedicos.procurarMedicoPorEspecialidade(especialidade);
-
         if (lista != null) {
             for (Medico medico : lista) {
                 System.out.println(medico);
@@ -511,7 +511,7 @@ public class Main {
         } else {
             System.out.println(RED + "Nenhum médico com essa especialidade." + RESET);
         }
-        ler.nextLine();
+        pressionarEnter(ler);
     }
     //endregion
 
@@ -593,7 +593,7 @@ public class Main {
             String nome = ler.nextLine();
             Especialidade especialidade = new Especialidade(sigla, nome);
             ficheiroEspecialidade.adicionarEspecialidade(especialidade);
-            ficheiroEspecialidade.guardarFicheiro("especialidade.txt");
+            ficheiroEspecialidade.guardarFicheiro("especialidades.txt");
             System.out.println(GREEN + "Especialidade registada com sucesso!" + RESET);
             GestorLogs.registarSucesso("Nova Especialidade: " + nome + " (" + sigla + ")");
         }
@@ -761,7 +761,7 @@ public class Main {
                 pressionarEnter(ler);
                 return;
             }
-            NivelSintomas opcaoSelecionado = nivelSintomas[opcao -1];
+            NivelSintomas opcaoSelecionado = nivelSintomas[opcao - 1];
             System.out.println("\nAssociar a qual a especialidade? (Sigla ex: CARD)");
             for (Especialidades especialidade : Especialidades.values()) {
                 System.out.println(especialidade.getCodigo() + " ");
@@ -782,7 +782,7 @@ public class Main {
                 System.out.println(YELLOW + "Erro: Sigla não encontrada no sistema. Será registado sem especialidade automática." + RESET);
                 GestorLogs.registarErro("RegistarSintomas", "Sigla não encontrada: " + siglaIntroduzida + ". Gravado como NA.");
             }
-            Sintomas sintomas = new Sintomas(nome,opcaoSelecionado,especialidades);
+            Sintomas sintomas = new Sintomas(nome, opcaoSelecionado, especialidades);
             ficheirosSintomas.adicionarSintoma(sintomas);
             ficheirosSintomas.guardarSintomas();
 
@@ -939,8 +939,8 @@ public class Main {
         ler.nextLine();
     }
 
-    private static void addHora(){
-        if(hora == 23) hora = 0;
+    private static void addHora() {
+        if (hora == 23) hora = 0;
         else hora++;
 
         for (var medico : medicos){
