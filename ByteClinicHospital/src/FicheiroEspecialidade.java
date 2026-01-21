@@ -1,6 +1,7 @@
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Formatter;
 import java.util.Scanner;
 import java.util.concurrent.ForkJoinPool;
@@ -30,25 +31,28 @@ public class FicheiroEspecialidade {
             novo[i] = listaEspecialidade[i];
         }
         this.listaEspecialidade = novo;
+        System.out.println("Array redimensionado para: " + listaEspecialidade.length);
     }
     //endregion
 
     //region CARREGAR FICHEIRO
-    public void carregarFicheiro(String especialidade){
-        File ficheiro = new File("especialidade.txt");
+    public void carregarFicheiro(String caminho){
+        File ficheiro = new File(caminho);
         if(!ficheiro.exists()) {
-            GestorLogs.registarErro("FicheiroEspecialidade", "Ficheiro " + especialidade + " não encontrado.");
+            GestorLogs.registarErro("FicheiroEspecialidade", "Ficheiro " + caminho + " não encontrado.");
             return;
         }
         try {
             Scanner ler = new Scanner(ficheiro);
             while (ler.hasNextLine()) {
                 String linha = ler.nextLine();
-                if(linha.trim().isEmpty())
-                    continue;
+                if(linha.trim().isEmpty()) continue;
                 String[] dados = linha.split(";");
                 if(dados.length >= 2){
-                    Especialidade especialidade2 = new Especialidade(dados[0], dados[1]);
+                    String sigla = dados[0].trim();
+                    String nome = dados[1].trim();
+
+                    Especialidade especialidade2 = new Especialidade(sigla, nome);
                     adicionarEspecialidade(especialidade2);
                 }
             }
@@ -63,11 +67,12 @@ public class FicheiroEspecialidade {
     //region GUARDAR FICHEIRO
     public void guardarFicheiro(String especialidade) {
         try {
-            Formatter formatter = new Formatter(new FileWriter(especialidade, false));
+            PrintWriter out = new PrintWriter(new FileWriter(especialidade));
             for (int i = 0; i < totalEspecialidade; i++) {
                 Especialidade especialidade1 = listaEspecialidade[i];
-                formatter.format("%s;%s%n", especialidade1.getSigla(), especialidade1.getNome());
+                out.format("%s;%s", especialidade1.getSigla(), especialidade1.getNome());
             }
+            out.close();
             System.out.println("Ficheiro guardado com sucesso.");
         } catch (IOException e) {
             System.out.println("Erro ao guardar:" + e.getMessage());
@@ -93,6 +98,7 @@ public class FicheiroEspecialidade {
         totalEspecialidade--;
 
         System.out.println("Removido com sucesso!");
+        guardarFicheiro("especialidades.txt");
         return true;
     }
     //endregion
@@ -114,13 +120,11 @@ public class FicheiroEspecialidade {
     }
     //endregion
 
-    public boolean atualizarEspecialidade(String sigla, String novoNome){
+    public void atualizarEspecialidade(String sigla, String novoNome){
         Especialidade especialidade = procurarEspecialidade(sigla);
         if (especialidade != null) {
             especialidade.setNome(novoNome);
-            return true;
         }
-        return false;
     }
     public Especialidade[] getLista() { return listaEspecialidade; }
     public int getTotal() { return totalEspecialidade; }

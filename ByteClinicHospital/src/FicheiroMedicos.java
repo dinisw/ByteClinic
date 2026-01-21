@@ -38,7 +38,7 @@ public class FicheiroMedicos {
     public void carregarFicheiro(String caminho) {
         File ficheiro = new File(caminho);
         if (!ficheiro.exists()) {
-            GestorLogs.registarErro("Ficheiro MEdicos", "Ficheiro " + medicos + "não existe.");
+            GestorLogs.registarErro("Ficheiro Médicos", "Ficheiro não existe.");
             return;
         }
         try {
@@ -75,7 +75,7 @@ public class FicheiroMedicos {
     //region GUARDAR FICHEIRO
     public void guardarFicheiroMedico(String caminho) {
         try {
-            PrintWriter writer = new PrintWriter (new File(caminho));
+            PrintWriter writer = new PrintWriter (caminho);
             for (int i = 0; i < totalMedicos; i++) {
                 Medico medico = listaMedicos[i];
                 writer.printf("%s;%d;%s;%d;%d;%.2f%n",
@@ -87,10 +87,10 @@ public class FicheiroMedicos {
                         medico.getSalarioHora());
             }
             writer.close();
-            GestorLogs.registarSucesso("Médico guardado em ficheiro: " + medico.getNomeMedico() + " (Cédula: " + medico.getCedulaProfissional() + ")");
+            GestorLogs.registarSucesso("Médico guardado em ficheiro");
         } catch (IOException ex) {
             System.out.println("Erro ao guardar ficheiro" + ex.getMessage());
-            GestorLogs.registarErro("FicheiroMedicos", "Falha ao gravar médico " + medico.getCedulaProfissional() + ": " + ex.getMessage());
+            GestorLogs.registarErro("FicheiroMedicos", "Falha ao gravar médico" + ex.getMessage());
         }
     }
     //endregion
@@ -156,18 +156,21 @@ public class FicheiroMedicos {
      */
     //region PROCURAR MEDICO POR ESPECIALIDADE
     public Medico[] procurarMedicoPorEspecialidade(String especialidade) {
-        int contador = -1;
+        // PASSO 1: Contar quantos médicos existem
+        int contador = 0;
         for (int i = 0; i < totalMedicos; i++) {
             if (listaMedicos[i].getEspecialidade().equalsIgnoreCase(especialidade)) {
                 contador++;
             }
         }
-        if (contador == -1) return null;
+
         Medico[] especialidadeMedico = new Medico[contador];
-        int index = 0;
+
+        int indiceResultado = 0;
         for (int i = 0; i < totalMedicos; i++) {
             if (listaMedicos[i].getEspecialidade().equalsIgnoreCase(especialidade)) {
-                especialidadeMedico[index++] = listaMedicos[i]; //???
+                especialidadeMedico[indiceResultado] = listaMedicos[i];
+                indiceResultado++;
             }
         }
         return especialidadeMedico;
