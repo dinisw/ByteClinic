@@ -138,8 +138,6 @@ public class Main {
         System.out.println(CYAN_BOLD + bordaInferior + RESET);
     }
 
-
-
     //region MENU TRIAGEM
     private static void menuTriagem(Scanner ler) {
         String opcao = "";
@@ -396,10 +394,16 @@ public class Main {
             ler.nextLine();
             Medico medicos = new Medico(nome,cedula,especialidade,horaEntrada,horaSaida, salario);
             ficheiroMedicos.adicionarMedico(medicos);
-            ficheiroMedicos.guardarFicheiroMedico("medicos.txt");
-            System.out.println(GREEN + "Médico registado com sucesso!" + RESET);
+            ficheiroMedicos.guardarFicheiroMedico(medicos, "medicos.txt");
+
+            System.out.println(GREEN + "Médico registado!" + RESET);
+            GestorLogs.registarSucesso("Novo Médico registado: " + nome + " (Cédula: " + cedula + ")");
         } catch (NumberFormatException e) {
             System.out.println(RED + "Erro: Introduza números válidos." + RESET);
+            GestorLogs.registarErro("RegistarMedico", "Input inválido (não é número): " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println(RED + "Erro:" + e.getMessage() + RESET);
+            GestorLogs.registarErro("RegistarMedico", "Erro inesperado: " + e.getMessage());
         }
         pressionarEnter(ler);
     }
@@ -506,7 +510,6 @@ public class Main {
     }
     //endregion
 
-
     //region MENU ESPECIALIDADE
     private static void menuEspecialidades(Scanner ler) {
         String opcao = "";
@@ -579,12 +582,15 @@ public class Main {
 
         if (ficheiroEspecialidade.existeEspecialidade(sigla)) {
             System.out.println(RED + "Erro: Essa sigla já existe!" + RESET);
+            GestorLogs.registarErro("RegistarEspecialidade", "Tentativa de duplicar sigla: " + sigla);
         } else {
             System.out.print("Nome descritivo (ex: Ortopedia): ");
             String nome = ler.nextLine();
             Especialidade especialidade = new Especialidade(sigla, nome);
             ficheiroEspecialidade.adicionarEspecialidade(especialidade);
+            ficheiroEspecialidade.guardarFicheiro("especialidade.txt");
             System.out.println(GREEN + "Especialidade registada com sucesso!" + RESET);
+            GestorLogs.registarSucesso("Nova Especialidade: " + nome + " (" + sigla + ")");
         }
         pressionarEnter(ler);
     }
@@ -653,8 +659,6 @@ public class Main {
         pressionarEnter(ler);
     }
     //endregion
-
-
 
     //region MENU SINTOMAS
     private static void menuSintomas(Scanner ler) {
@@ -727,7 +731,8 @@ public class Main {
         String nome = ler.nextLine();
 
         if (ficheirosSintomas.procurarSintoma(nome) != null) {
-            System.out.println(RED + "Erro: Esse Sintoma já existe!" + RESET);
+            System.out.println(RED + "Erro: O Sintoma '" + nome + "' já existe!" + RESET);
+            GestorLogs.registarErro("RegistarSintomas", "Tentativa de duplicar sintoma: " + nome);
             pressionarEnter(ler);
             return;
         } else {
@@ -747,33 +752,37 @@ public class Main {
             }
             if (opcao < 1 || opcao > nivelSintomas.length) {
                 System.out.println(RED + "Opção inválida." + RESET);
+                GestorLogs.registarErro("RegistarSintomas", "Opção de nível inválida.");
                 pressionarEnter(ler);
                 return;
             }
             NivelSintomas opcaoSelecionado = nivelSintomas[opcao -1];
-            System.out.println("\nAssociar a qual a especialidade? (Sigla)");
+            System.out.println("\nAssociar a qual a especialidade? (Sigla ex: CARD)");
             for (Especialidades especialidade : Especialidades.values()) {
                 System.out.println(especialidade.getCodigo() + " ");
             }
-            System.out.println("\nSigla: ");
+            System.out.print("\nSigla: ");
             String siglaIntroduzida = ler.nextLine().toUpperCase();
 
             Especialidades especialidades = null;
-            if (ficheiroEspecialidade.existeEspecialidade(siglaIntroduzida)) {
-                for (Especialidades especialidades2 : Especialidades.values()) {
-                    if (especialidades2.getCodigo().equals(siglaIntroduzida)) {
-                        especialidades = especialidades2;
-                        break;
-                    }
+            boolean encontrada = false;
+            for (Especialidades especialidades2 : Especialidades.values()) {
+                if (especialidades2.getCodigo().equals(siglaIntroduzida)) {
+                    especialidades = especialidades2;
+                    encontrada = true;
+                    break;
                 }
-            } else {
+            }
+            if (!encontrada && !siglaIntroduzida.isEmpty()) {
                 System.out.println(YELLOW + "Erro: Sigla não encontrada no sistema. Será registado sem especialidade automática." + RESET);
+                GestorLogs.registarErro("RegistarSintomas", "Sigla não encontrada: " + siglaIntroduzida + ". Gravado como NA.");
             }
             Sintomas sintomas = new Sintomas(nome,opcaoSelecionado,especialidades);
             ficheirosSintomas.adicionarSintoma(sintomas);
             ficheirosSintomas.guardarSintomas();
 
             System.out.println(GREEN + "Sintoma registado com sucesso!" + RESET);
+            GestorLogs.registarSucesso("Novo sintoma criado: " + nome + " (" + opcaoSelecionado + ")");
             pressionarEnter(ler);
         }
     }
@@ -857,9 +866,11 @@ public class Main {
                 }
             } else {
                 System.out.println(RED + "Opção inválida." + RESET);
+                GestorLogs.registarErro("AtualizarSintoma", "Opção de nível inválida.");
             }
         } catch (Exception e) {
             System.out.println(RED + "Erro ao ler opção." + RESET);
+            GestorLogs.registarErro("AtualizarSintoma", "Input inválido:" + e.getMessage());
         }
         pressionarEnter(ler);
     }
@@ -874,6 +885,7 @@ public class Main {
             System.out.println(GREEN + "Sintoma removido com sucesso." + RESET);
         } else {
             System.out.println(RED + "Sintoma não encontrado." + RESET);
+            GestorLogs.registarErro("RemoverSintoma", "Tentativa de remover sintoma inexistente: " + nome);
         }
         pressionarEnter(ler);
     }
@@ -885,7 +897,20 @@ public class Main {
     }
 
     private static void consultarEstatisticas(Scanner ler) {
-        System.out.println("\n--- Estatísticas e Logs ---");
+        System.out.println("\n" + CYAN_BOLD + "--- ESTATÍSTICAS E LOGS ---" + RESET);
+
+        System.out.println("1. Ver Logs de Erros e Atividade");
+        System.out.println("2. Ver Estatísticas Gerais");
+        System.out.println("0. Voltar");
+        System.out.print("Opção: ");
+        String opcao = ler.nextLine();
+
+        if (opcao.equals("1")) {
+            GestorLogs.lerLogs();
+        } else if (opcao.equals("2")) {
+            System.out.println("Total de Médicos: " + ficheiroMedicos.getTotalMedicos());
+            System.out.println("Total de Sintomas: " + ficheirosSintomas.getSintomas().length);
+        }
         pressionarEnter(ler);
     }
 
