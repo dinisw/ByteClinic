@@ -32,26 +32,32 @@ public class FicheirosSintomas {
     public void carregarSintomas() {
         File ficheiro = new File("sintomas.txt");
         if(!ficheiro.exists()) {
-            System.out.println("Erro ao carregar sintomas");
             return;
         }
         try {
             Scanner ler = new Scanner(ficheiro);
-            while(ler.hasNext()) {
+            while(ler.hasNextLine()) {
                 String linha = ler.nextLine();
                 if(linha.trim().isEmpty()) continue;
                 String[] dados = linha.split(";");
                 if(dados.length >= 2) {
                     String nome = dados[0];
-                    String cor = dados[1];
 
-                    int qtdEspecialidades = dados.length - 2;
-                    String[] especialidades =  new String[qtdEspecialidades];
-                    for(int i = 0; i < qtdEspecialidades; i++) {
-                        especialidades[i] = dados[i+2].trim();
+                    NivelSintomas nivelSintomas = NivelSintomas.VERDE;
+                    try {
+                        nivelSintomas = NivelSintomas.valueOf(dados[1]);
+                    } catch (Exception e) {}
+
+                    Especialidades especialidade = null;
+                    if (dados.length > 2 && !dados[2].equals("NA")) {
+                        for (Especialidades especialidades2 : Especialidades.values()) {
+                            if (especialidades2.getCodigo().equalsIgnoreCase(dados[2])) {
+                                especialidade = especialidades2;
+                                break;
+                            }
+                        }
                     }
-
-                    Sintomas sintoma = new Sintomas(nome, cor, especialidades);
+                    Sintomas sintoma = new Sintomas(nome, nivelSintomas, especialidade);
                     adicionarSintoma(sintoma);
                 }
             }
@@ -88,10 +94,6 @@ public class FicheirosSintomas {
         return true;
     }
 
-    public Sintomas[] getSintomas(){
-        return listaSintomas;
-    }
-
     public Sintomas procurarSintoma(String sintoma) {
         for(int i = 0; i < totalSintomas; i++) {
             if(listaSintomas[i].getNomeSintoma().equalsIgnoreCase(sintoma)) return  listaSintomas[i];
@@ -99,7 +101,7 @@ public class FicheirosSintomas {
         return null;
     }
 
-    public boolean atualuzarSintoma(String nomeSintoma, NivelSintomas nivelSintomas) {
+    public boolean atualizarSintoma(String nomeSintoma, NivelSintomas nivelSintomas) {
         Sintomas sintomas = procurarSintoma(nomeSintoma);
         if(sintomas != null) {
             sintomas.setNivelSintoma(nivelSintomas);
@@ -107,4 +109,6 @@ public class FicheirosSintomas {
         }
         return false;
     }
+
+    public Sintomas[] getSintomas() {return listaSintomas; }
 }
