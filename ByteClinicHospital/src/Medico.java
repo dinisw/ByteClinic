@@ -7,6 +7,8 @@ public class Medico {
     private double salarioHora;
     private boolean ocupado;
     private int totalPacientesAtendidos;
+    private int tempoDeAtendimento;
+    private int horasConsecutivasDeAtendimento;
 
     public Medico(String nomeMedico,int cedulaProfissional, String especialidade, int horaEntrada, int horaSaida, double salarioHora) {
         this.nomeMedico = nomeMedico;
@@ -17,6 +19,7 @@ public class Medico {
         this.salarioHora = salarioHora;
         this.ocupado = false;
         this.totalPacientesAtendidos = 0;
+        this.tempoDeAtendimento = 0;
     }
 
     public void inicioAtendimento() {
@@ -91,6 +94,23 @@ public class Medico {
     public void setTotalPacientesAtendidos(int totalPacientesAtendidos) {
         this.totalPacientesAtendidos = totalPacientesAtendidos;
     }
+
+    public void getDescanso(){
+        //if (tempoDeAtendimento )
+    }
+
+    public void addHoraMedico(){
+        horasConsecutivasDeAtendimento++;
+        if(horasConsecutivasDeAtendimento == 5){
+            ocupado = true;
+        }
+        if(horasConsecutivasDeAtendimento == 6){
+            ocupado = false;
+            horasConsecutivasDeAtendimento = 0;
+        }
+    }
+
+
 
     @Override
     public String toString() {

@@ -35,7 +35,7 @@ public class FicheirosSintomas {
     //endregion
 
     //region CARREGAR SINTOMAS
-    public void carregarSintomas() {
+    public void carregarSintomas(String sep) {
         File ficheiro = new File("sintomas.txt");
         if(!ficheiro.exists()) {
             GestorLogs.registarErro("FicheiroSintomas", "Ficheiro sintomas.txt não encontrado. Será criado um novo.");
@@ -46,7 +46,7 @@ public class FicheirosSintomas {
             while(ler.hasNextLine()) {
                 String linha = ler.nextLine();
                 if(linha.trim().isEmpty()) continue;
-                String[] dados = linha.split(";");
+                String[] dados = linha.split(sep);
                 if(dados.length >= 2) {
                     try {
                         String nome = dados[0];
