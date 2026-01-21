@@ -14,7 +14,7 @@ public class FicheiroMedicos {
     public void carregarFicheiro(String medicos) {
         File ficheiro = new File("medicos.txt");
         if (!ficheiro.exists()) {
-            System.out.println("O ficheiro" + medicos + "não existe!");
+            GestorLogs.registarErro("Ficheiro MEdicos", "Ficheiro " + medicos + "não existe.");
             return;
         }
         try {
@@ -23,7 +23,7 @@ public class FicheiroMedicos {
                 String linha = ler.nextLine();
                 if (linha.trim().isEmpty()) continue;
                 String[] dados = linha.split(";");
-                if (dados.length == 6) {
+                if (dados.length >= 6) {
                     String nomeMedico = dados[0];
                     int cedula  = Integer.parseInt(dados[1]);
                     String especialidade = dados[2];
@@ -34,9 +34,12 @@ public class FicheiroMedicos {
                     adicionarMedico(medico);
                 }
             }
+            ler.close();
             System.out.println("Médicos carregados: " + totalMedicos);
         } catch (FileNotFoundException e) {
-            System.out.println("Erro ao carregar o ficheiro" + e.getMessage());
+            System.out.println("Erro ao carregar médicos" + e.getMessage());
+            GestorLogs.registarErro("FicheiroMedicos", "Erro ao ler ficheiro: " + e.getMessage());
+
         }
     }
     //endregion
@@ -57,9 +60,10 @@ public class FicheiroMedicos {
                     medico.getHoraSaida(),
                     medico.getSalarioHora());
             writer.close();
-            System.out.println("Ficheiro guardado com sucesso.");
+            GestorLogs.registarSucesso("Médico guardado em ficheiro: " + medico.getNomeMedico() + " (Cédula: " + medico.getCedulaProfissional() + ")");
         } catch (IOException ex) {
             System.out.println("Erro ao guardar ficheiro" + ex.getMessage());
+            GestorLogs.registarErro("FicheiroMedicos", "Falha ao gravar médico " + medico.getCedulaProfissional() + ": " + ex.getMessage());
         }
     }
     //endregion

@@ -37,7 +37,7 @@ public class FicheiroEspecialidade {
     public void carregarFicheiro(String especialidade){
         File ficheiro = new File("especialidade.txt");
         if(!ficheiro.exists()) {
-            System.out.println("O ficheiro" + especialidade + "não existe!");
+            GestorLogs.registarErro("FicheiroEspecialidade", "Ficheiro " + especialidade + " não encontrado.");
             return;
         }
         try {
@@ -52,9 +52,10 @@ public class FicheiroEspecialidade {
                     adicionarEspecialidade(especialidade2);
                 }
             }
-            System.out.println("Especialidades carregadas: " + totalEspecialidade);
+            ler.close();
         } catch (IOException e) {
-            System.out.println("Erro ao carregar o ficheiro: " + e.getMessage());
+            System.out.println("Erro: " + e.getMessage());
+            GestorLogs.registarErro("FicheiroEspecialidade", "Erro leitura: " + e.getMessage());
         }
     }
     //endregion
@@ -62,15 +63,15 @@ public class FicheiroEspecialidade {
     //region GUARDAR FICHEIRO
     public void guardarFicheiro(String especialidade) {
         try {
-            Formatter formatter = new Formatter(new FileWriter(especialidade));
+            Formatter formatter = new Formatter(new FileWriter(especialidade, false));
             for (int i = 0; i < totalEspecialidade; i++) {
                 Especialidade especialidade1 = listaEspecialidade[i];
                 formatter.format("%s;%s%n", especialidade1.getSigla(), especialidade1.getNome());
             }
             System.out.println("Ficheiro guardado com sucesso.");
         } catch (IOException e) {
-            System.out.println("Erro ao guardar ficheiro" + e.getMessage());
-        }
+            System.out.println("Erro ao guardar:" + e.getMessage());
+            GestorLogs.registarErro("FicheiroEspecialidade", "Erro escrita: " + e.getMessage());        }
     }
     //endregion
 
