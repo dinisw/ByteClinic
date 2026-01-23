@@ -57,6 +57,7 @@ public class FicheiroEspecialidade {
                 }
             }
             ler.close();
+            System.out.println("Especialidades carregados: " + totalEspecialidade);
         } catch (IOException e) {
             System.out.println("Erro: " + e.getMessage());
             GestorLogs.registarErro("FicheiroEspecialidade", "Erro leitura: " + e.getMessage());
@@ -67,15 +68,17 @@ public class FicheiroEspecialidade {
     //region GUARDAR FICHEIRO
     public void guardarFicheiro(String especialidade) {
         try {
-            PrintWriter out = new PrintWriter(new FileWriter(especialidade));
+            PrintWriter out = new PrintWriter (especialidade);
             for (int i = 0; i < totalEspecialidade; i++) {
                 Especialidade especialidade1 = listaEspecialidade[i];
-                out.format("%s;%s", especialidade1.getSigla(), especialidade1.getNome());
+                out.printf("%s;%s%n",
+                        especialidade1.getSigla(),
+                        especialidade1.getNome());
             }
             out.close();
-            System.out.println("Ficheiro guardado com sucesso.");
+            GestorLogs.registarSucesso("Ficheiro guardado com sucesso.");
         } catch (IOException e) {
-            System.out.println("Erro ao guardar:" + e.getMessage());
+            System.out.println("Erro ao guardar ficheiro:" + e.getMessage());
             GestorLogs.registarErro("FicheiroEspecialidade", "Erro escrita: " + e.getMessage());        }
     }
     //endregion
@@ -89,7 +92,10 @@ public class FicheiroEspecialidade {
                 break;
             }
         }
-        if(contador == -1) return false;
+        if(contador == -1){
+            System.out.println("A especialidade não foi encontrado.");
+            return false;
+        }
 
         for(int i = contador; i < totalEspecialidade; i++) {
             listaEspecialidade[i] = listaEspecialidade[i+1];
@@ -112,7 +118,7 @@ public class FicheiroEspecialidade {
     //region PROCURAR ESPECIALIDADE
     public Especialidade procurarEspecialidade(String sigla) {
         for(int i = 0; i < totalEspecialidade; i++) {
-            if(listaEspecialidade[i].getSigla().equalsIgnoreCase(sigla)) {
+            if(listaEspecialidade[i].getSigla().equals(sigla)) {
                 return listaEspecialidade[i];
             }
         }
@@ -124,6 +130,7 @@ public class FicheiroEspecialidade {
         Especialidade especialidade = procurarEspecialidade(sigla);
         if (especialidade != null) {
             especialidade.setNome(novoNome);
+            guardarFicheiro("especialidades.txt");
         }
     }
     public Especialidade[] getLista() { return listaEspecialidade; }

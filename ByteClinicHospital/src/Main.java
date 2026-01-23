@@ -36,8 +36,8 @@ public class Main {
         //Medico[] especialidades = FicheiroMedicos.getMedicos(); //Ver como especialidades os médicos pra cá
 
         ficheiroMedicos.carregarFicheiro("medicos.txt");
-        ficheiroEspecialidade.carregarFicheiro("especialidade.txt");
-        ficheirosSintomas.carregarSintomas(sep);
+        ficheiroEspecialidade.carregarFicheiro("especialidades.txt");
+        ficheirosSintomas.carregarSintomas("sintomas.txt");
 
 
         Scanner ler = new Scanner(System.in);
@@ -632,11 +632,11 @@ public class Main {
     //region PESQUISAR ESPECIALIDADE
     private static void pesquisarEspecialidade(Scanner ler) {
         System.out.print("Qual a sigla a pesquisar? ");
-        String sigla = ler.nextLine();
+        String sigla = ler.nextLine().toUpperCase();
         Especialidade especialidade = ficheiroEspecialidade.procurarEspecialidade(sigla);
 
         if (especialidade != null) {
-            System.out.println(GREEN + "\nEncontrado: " + RESET);
+            System.out.println(GREEN + "\nEncontrado: " + especialidade + RESET);
         } else {
             System.out.println(RED + "Não encontrada." + RESET);
         }
@@ -649,7 +649,8 @@ public class Main {
         System.out.print("Sigla da especialidade a editar: ");
         String sigla = ler.nextLine();
 
-        if (ficheiroEspecialidade.existeEspecialidade(sigla)) {
+        Especialidade procura = ficheiroEspecialidade.procurarEspecialidade(sigla);
+        if (procura == null) {
             System.out.println(RED + "Especialidade não Existe." + RESET);
         } else {
             System.out.print("Novo Nome: ");
@@ -793,7 +794,7 @@ public class Main {
             }
             Sintomas sintomas = new Sintomas(nome, opcaoSelecionado, especialidades);
             ficheirosSintomas.adicionarSintoma(sintomas);
-            ficheirosSintomas.guardarSintomas();
+            ficheirosSintomas.guardarSintomas("sintomas.txt");
 
             System.out.println(GREEN + "Sintoma registado com sucesso!" + RESET);
             GestorLogs.registarSucesso("Novo sintoma criado: " + nome + " (" + opcaoSelecionado + ")");
@@ -875,7 +876,7 @@ public class Main {
             int opcao = Integer.parseInt(ler.nextLine());
             if (opcao >= 1 && opcao <= nivelSintoma.length) {
                 if (ficheirosSintomas.atualizarSintoma(nome, nivelSintoma[opcao - 1])) {
-                    ficheirosSintomas.guardarSintomas();
+                    ficheirosSintomas.guardarSintomas("sintomas.txt");
                     System.out.println(GREEN + "Atualizado com sucesso!" + RESET);
                 }
             } else {
@@ -895,7 +896,7 @@ public class Main {
         System.out.print("Nome do sintoma a remover: ");
         String nome = ler.nextLine();
         if (ficheirosSintomas.removerSintoma(nome)) {
-            ficheirosSintomas.guardarSintomas();
+            ficheirosSintomas.guardarSintomas("sintomas.txt");
             System.out.println(GREEN + "Sintoma removido com sucesso." + RESET);
         } else {
             System.out.println(RED + "Sintoma não encontrado." + RESET);
