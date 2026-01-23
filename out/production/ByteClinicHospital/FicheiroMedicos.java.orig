@@ -26,8 +26,7 @@ public class FicheiroMedicos {
                 if (dados.length == 6) {
                     String nomeMedico = dados[0];
                     int cedula  = Integer.parseInt(dados[1]);
-                    String especialidadeStr = dados[2];
-                    Especialidades especialidade = Especialidades.ORTOPEDIA; //CORRRIGIR VITOR
+                    String especialidade = dados[2];
                     int horaEntrada = Integer.parseInt(dados[3]);
                     int horaSaida = Integer.parseInt(dados[4]);
                     int salarioHora = Integer.parseInt(dados[5]);
@@ -61,29 +60,6 @@ public class FicheiroMedicos {
             System.out.println("Ficheiro guardado com sucesso.");
         } catch (IOException ex) {
             System.out.println("Erro ao guardar ficheiro" + ex.getMessage());
-        }
-    }
-
-    public void guardarTodosMedicos(String caminho) {
-        try {
-            PrintWriter writer = new PrintWriter(new FileWriter(caminho, false));
-
-            for (int i = 0; i < totalMedicos; i++) {
-                Medico m = listaMedicos[i];
-                if (m != null) {
-                    writer.printf("%s;%d;%s;%d;%d;%.2f%n",
-                            m.getNomeMedico(),
-                            m.getCedulaProfissional(),
-                            m.getEspecialidade().getNome(),
-                            m.getHoraEntrada(),
-                            m.getHoraSaida(),
-                            m.getSalarioHora());
-                }
-            }
-            writer.close();
-            System.out.println("Base de dados de médicos atualizada com sucesso.");
-        } catch (IOException e) {
-            System.out.println("Erro grave ao guardar médicos: " + e.getMessage());
         }
     }
     //endregion
@@ -127,22 +103,19 @@ public class FicheiroMedicos {
     //endregion
 
     //region PROCURAR MEDICO POR ESPECIALIDADE
-    public Medico[] procurarMedicoPorEspecialidade(Especialidades especialidadeAlvo) {
+    public Medico[] procurarMedicoPorEspecialidade(String especialidade) {
         int contador = 0;
-
         for (int i = 0; i < totalMedicos; i++) {
-            if (listaMedicos[i] != null && listaMedicos[i].getEspecialidade() == especialidadeAlvo) {
+            if (listaMedicos[i].getEspecialidade().equalsIgnoreCase(especialidade)) {
                 contador++;
             }
         }
-
         if (contador == 0) return null;
         Medico[] especialidadeMedico = new Medico[contador];
         int index = 0;
-
         for (int i = 0; i < totalMedicos; i++) {
-            if (listaMedicos[i] != null && listaMedicos[i].getEspecialidade() == especialidadeAlvo) {
-                especialidadeMedico[index++] = listaMedicos[i];
+            if (listaMedicos[i].getEspecialidade().equalsIgnoreCase(especialidade)) {
+                especialidadeMedico[index++] = listaMedicos[i]; //???
             }
         }
         return especialidadeMedico;
@@ -151,24 +124,27 @@ public class FicheiroMedicos {
 
     //region REMOVER MEDICO
     public boolean removerMedico(int cedula) {
-        int contador = -1;
+        int contador = 0;
         for (int i = 0; i < totalMedicos; i++) {
             if (listaMedicos[i].getCedulaProfissional() == cedula) {
                 contador = i;
                 break;
             }
         }
+<<<<<<< HEAD
         for (int i = contador; i < totalMedicos - 1; i++) {
             listaMedicos[i] = listaMedicos[i + 1];
+=======
+        for (int i = 0; i < totalMedicos - 1; i++) {
+            listaMedicos[totalMedicos - 1] = null;
+            totalMedicos--;
+>>>>>>> main
         }
-        listaMedicos[totalMedicos - 1] = null;
-        totalMedicos--;
         return true;
     }
     //endregion
-
     //region ATUALIZAR MEDICO
-    public boolean atualizarMedico(int cedula, String novoNomeMedico, Especialidades novaEspecialidade, int novaHoraEntrada, int novaHoraSaida, int novoSalarioHora) {
+    public boolean atualizarMedico(int cedula, String novoNomeMedico, String novaEspecialidade, int novaHoraEntrada, int novaHoraSaida, int novoSalarioHora) {
         Medico medico = procurarMedicoPorCedula(cedula);
         if (medico != null) {
             medico.setNomeMedico(novoNomeMedico);
@@ -189,5 +165,3 @@ public class FicheiroMedicos {
         return totalMedicos;
     }
 }
-
-
