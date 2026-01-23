@@ -25,9 +25,6 @@ public class Especialidade {
 
     @Override
     public String toString() {
-        return "Especialidade{" +
-                "sigla='" + sigla + '\'' +
-                ", nome='" + nome + '\'' +
-                '}';
+        return String.format("Sigla: %s | Nome: %s", sigla, nome);
     }
 }
