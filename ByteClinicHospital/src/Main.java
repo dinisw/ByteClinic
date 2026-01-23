@@ -15,6 +15,7 @@ public class Main {
     private static String sep = ";";
 
     private static int hora = 0;
+    private static int dia = 1;
 
     //Design
     public static final String RESET = "\033[0m";
@@ -40,12 +41,15 @@ public class Main {
 
 
         Scanner ler = new Scanner(System.in);
-        exibirTitulo();
-        exibirMenu();
+        String opcao = " ";
 
-        System.out.print("\n" + WHITE_BOLD + "Digite a opção desejada: " + RESET);
-        String opcao = ler.nextLine();
+
         do {
+            exibirTitulo();
+            exibirMenu();
+            System.out.print("\n" + WHITE_BOLD + "Digite a opção desejada: " + RESET);
+
+            opcao = ler.nextLine();
 
             switch (opcao) {
                 case "1":
@@ -69,6 +73,13 @@ public class Main {
                 case "7":
                     configuracoes(ler);
                     break;
+                case "8":
+                    addHora();
+                    System.out.println("\n" + GREEN + ">> Tempo avançou 1 hora." + RESET);
+                    System.out.println("    Novo horário: " + String.format("Dia %d - %02d:00", dia, hora));
+                    pressionarEnter(ler);
+                    break;
+
                 case "0":
                     System.out.println("\n" + YELLOW + "Encerrando o sistema... Até logo!" + RESET);
                     break;
@@ -91,7 +102,7 @@ public class Main {
         String bordaInferior = "╚" + "═".repeat(LARGURA) + "╝";
 
         String titulo = "SISTEMA DE GESTÃO BYTECLINIC";
-        String dataHora = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+        String tempo = String.format("Dia: %d | Hora: %02d:00", dia, hora);
 
         int paddingTitulo = (LARGURA - titulo.length()) / 2;
         String textoTitulo = String.format("%" + paddingTitulo + "s%s%-" + paddingTitulo + "s", "", titulo, "");
@@ -100,15 +111,14 @@ public class Main {
 
         String statusLabel = " Status: ";
         String statusValor = "ONLINE";
-        String statusCompleto = statusLabel + statusValor;
 
-        int espacoDisponivel = LARGURA - statusLabel.length() - statusValor.length() - dataHora.length() - 1;
+        int espacoDisponivel = LARGURA - statusLabel.length() - statusValor.length() - tempo.length() - 1;
         String paddingData = " ".repeat(Math.max(0, espacoDisponivel));
 
         System.out.println(CYAN_BOLD + bordaSuperior + RESET);
         System.out.println(CYAN_BOLD + "║" + WHITE_BOLD + textoTitulo + CYAN_BOLD + "║" + RESET);
         System.out.println(CYAN_BOLD + bordaMeio + RESET);
-        System.out.println(CYAN_BOLD + "║" + RESET + statusLabel + GREEN + statusValor + RESET + paddingData + BLUE + dataHora + " " + CYAN_BOLD + "║" + RESET);
+        System.out.println(CYAN_BOLD + "║" + RESET + statusLabel + GREEN + statusValor + RESET + paddingData + BLUE + tempo + " " + CYAN_BOLD + "║" + RESET);
         System.out.println(CYAN_BOLD + bordaInferior + RESET);
     }
 
@@ -133,6 +143,7 @@ public class Main {
                 "5. Gerir o funcionamento do hospital",
                 "6. Consultar estatísticas e logs",
                 "7. Configurações",
+                "8. Avançar Tempo (+1H)",
                 "0. Sair"
         };
 
@@ -237,8 +248,7 @@ public class Main {
 
                 if (opcao.equalsIgnoreCase("sair")) {
                     break;
-                }
-                else if (opcao.equalsIgnoreCase("novo")) {
+                } else if (opcao.equalsIgnoreCase("novo")) {
                     registarSintomas(ler);
                 }
 
@@ -392,9 +402,8 @@ public class Main {
             int horaEntrada = Integer.parseInt(ler.nextLine());
             System.out.print("Hora Saída (0-23): ");
             int horaSaida = Integer.parseInt(ler.nextLine());
-            System.out.println("Salário Hora: ");
+            System.out.print("Salário Hora: ");
             int salario = Integer.parseInt(ler.nextLine());
-            ler.nextLine();
             Medico medicos = new Medico(nome, cedula, especialidade, horaEntrada, horaSaida, salario);
             ficheiroMedicos.adicionarMedico(medicos);
             ficheiroMedicos.guardarFicheiroMedico("medicos.txt");
@@ -903,35 +912,113 @@ public class Main {
 
     private static void consultarEstatisticas(Scanner ler) {
         System.out.println("\n" + CYAN_BOLD + "--- ESTATÍSTICAS E LOGS ---" + RESET);
+        System.out.println("Dia atual:" + dia + "| Hora: " + hora + "h");
+        System.out.println("--------------------------------");
 
         System.out.println("1. Ver Logs de Erros e Atividade");
-        System.out.println("2. Ver Estatísticas Gerais");
+        System.out.println("2. Ver Média de Utentes (Por Dia)");
+        System.out.println("3. Ver Tabela de Salários Médicos (Diário)");
         System.out.println("0. Voltar");
-        System.out.print("Opção: ");
+        System.out.print("\nOpção: ");
         String opcao = ler.nextLine();
 
-        if (opcao.equals("1")) {
-            GestorLogs.lerLogs();
-        } else if (opcao.equals("2")) {
-            System.out.println("Total de Médicos: " + ficheiroMedicos.getTotalMedicos());
-            System.out.println("Total de Sintomas: " + ficheirosSintomas.getSintomas().length);
+        switch (opcao) {
+            case "1":
+                GestorLogs.lerLogs();
+                break;
+            case "2":
+                mostrarMediaUtentes();
+                break;
+            case "3":
+                mostrarTabelaSalario();
+                break;
+            case "0":
+                return;
+            default:
+                System.out.println(RED + "Opção inválida." + RESET);
         }
         pressionarEnter(ler);
     }
 
-    private static void configuracoes(Scanner ler) {
-        System.out.println("\n--- Configurações (0 para voltar ao menu anterior) ---");
-        String tentativaDeAcesso = "";
-        do {
-            System.out.print("Digite a password para acessar esse menu: ");
-            tentativaDeAcesso = ler.nextLine().trim().toLowerCase();
+    private static void mostrarMediaUtentes() {
+        int totalAtendidos = 0;
+        Medico[] lista = ficheiroMedicos.getListaMedicos();
+        int totalMedicos = ficheiroMedicos.getTotalMedicos();
 
-            if (!tentativaDeAcesso.equals(PASSWORD) && !tentativaDeAcesso.equals("0")) {
-                System.out.println("Senha incorreta, tente novamente...");
-                continue;
+        for (int i = 0; i < totalMedicos; i++) {
+            if (lista[i] != null) {
+                totalAtendidos += lista[i].getTotalPacientesAtendidos();
             }
+        }
+        double media = (dia > 0) ? (double) totalAtendidos / dia : totalAtendidos;
+
+        System.out.println("\n" + CYAN_BOLD + "--- ESTATÍSTICAS GERAIS ---" + RESET);
+        System.out.println("Total de Médicos: " + totalMedicos);
+        System.out.println("Total de Sintomas Registados: " + ficheirosSintomas.getSintomas().length);
+        System.out.println("---------------------------");
+        System.out.println("Total de Utentes Atendidos: " + totalAtendidos);
+        System.out.printf("Média de Utentes por Dia: %.2f%n", media);
+        System.out.println("---------------------------");
+    }
+
+    private static void mostrarTabelaSalario() {
+        Medico[] lista = ficheiroMedicos.getListaMedicos();
+        int total = ficheiroMedicos.getTotalMedicos();
+
+        if (total == 0) {
+            System.out.println(YELLOW + "Não existem médicos registados para calcular salários." + RESET);
+            return;
+        }
+        System.out.println("\n" + CYAN_BOLD + "--- TABELA DE VENCIMENTOS DIÁRIOS ---" + RESET);
+        String headerFormat = "| %-20s | %-10s | %-12s | %-12s | %-15s |%n";
+        String rowFormat    = "| %-20s | %-10d | %02d:00-%02d:00  | %-12d | %-14s |%n";
+
+        System.out.format("+----------------------+------------+--------------+--------------+-----------------+%n");
+        System.out.format(headerFormat, "NOME MÉDICO", "CÉDULA", "TURNO", "HORAS/DIA", "SALÁRIO/DIA");
+        System.out.format("+----------------------+------------+--------------+--------------+-----------------+%n");
+        double totalSalarioDia = 0;
+
+        for (int i = 0; i < total; i++) {
+            Medico medico = lista[i];
+            if (medico != null) {
+                int entrada = medico.getHoraEntrada();
+                int saida = medico.getHoraSaida();
+                int horasTrabalho;
+
+                if (saida >= entrada) {
+                    horasTrabalho = saida - entrada;
+                } else {
+                    horasTrabalho = (24 - entrada) + saida;
+                }
+
+                double salarioDia = horasTrabalho * medico.getSalarioHora();
+                totalSalarioDia += salarioDia;
+
+                System.out.format(rowFormat,
+                        medico.getNomeMedico(),medico.getCedulaProfissional(),entrada, saida, horasTrabalho, String.format("%.2f €", salarioDia));
+                }
+            }
+        System.out.format("+----------------------+------------+--------------+--------------+-----------------+%n");
+        System.out.printf("| %62s | " + GREEN + "%-14s" + RESET + " |%n", "TOTAL DIÁRIO:", String.format("%.2f €", totalSalarioDia));
+        System.out.format("+----------------------+------------+--------------+--------------+-----------------+%n");
+
+    }
+
+    private static void configuracoes(Scanner ler) {
+        System.out.println("\n--- CONFIGURAÇÕES ---");
+        System.out.println("Digite a password para acessar o menu (0 para voltar):");
+        String tentativaDeAcesso = ler.nextLine().trim().toLowerCase();
+
+        if (tentativaDeAcesso.equals("0"))
+            return;
+
+        if (tentativaDeAcesso.equals(PASSWORD)) {
+            System.out.println(GREEN + "Acesso Autorizado" + RESET);
             pressionarEnter(ler);
-        } while (!tentativaDeAcesso.equals("0"));
+        } else {
+            System.out.println(RED + "Senha incorreta." + RESET);
+            pressionarEnter(ler);
+        }
     }
 
     private static void pressionarEnter(Scanner ler) {
@@ -940,14 +1027,21 @@ public class Main {
     }
 
     private static void addHora() {
-        if (hora == 23) hora = 0;
-        else hora++;
-
-        for (var medico : medicos){
-            medico.addHoraMedico();
+        if (hora == 23) {
+            hora = 0;
+            dia ++;
+            GestorLogs.registarSucesso("Novo dia: Dia " + dia);
+        } else {
+            hora++;
         }
+        Medico[] lista = ficheiroMedicos.getListaMedicos();
+        for (int i = 0; i < ficheiroMedicos.getTotalMedicos(); i++ )
+            if (lista[i] != null) {
+                //for (var medico : medicos){
+                //medico.addHoraMedico();
+                lista[i].addHoraMedico();
+            }
         //addHoraUtente()
-
     }
 
 }
