@@ -75,7 +75,7 @@ public class FicheiroMedicos {
     //region GUARDAR FICHEIRO
     public void guardarFicheiroMedico(String caminho) {
         try {
-            PrintWriter writer = new PrintWriter (caminho);
+            PrintWriter writer = new PrintWriter(caminho);
             for (int i = 0; i < totalMedicos; i++) {
                 Medico medico = listaMedicos[i];
                 writer.printf("%s;%d;%s;%d;%d;%.2f%n",
@@ -224,6 +224,7 @@ public class FicheiroMedicos {
             medico.setHoraEntrada(novaHoraEntrada);
             medico.setHoraSaida(novaHoraSaida);
             medico.setSalarioHora(novoSalarioHora);
+            guardarFicheiroMedico("medicos.txt");
         }
     }
     //endregion\
