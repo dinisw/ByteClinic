@@ -1,3 +1,4 @@
 CARD;Cardiologia
 ORTO;Ortopedia
 PEDI;Pediatria
+ORT;Ortopedia
