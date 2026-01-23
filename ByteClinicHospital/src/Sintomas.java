@@ -9,10 +9,7 @@ public class Sintomas {
         this.especialidadesAssociadas = especialidadesAssociadas;
     }
 
-
-    public Sintomas() {
-    }
-
+    public Sintomas(){}
     public String getNomeSintoma() {
         return nomeSintoma;
     }
@@ -46,13 +43,4 @@ public class Sintomas {
                 '}';
     }
 
-    public String paraFicheiro() {
-        String linha = nomeSintoma + ";" + nivelSintomas.name();
-        if (especialidadesAssociadas != null) {
-            linha += ";" + especialidadesAssociadas.getCodigo();
-        } else {
-            linha += ";NA";
-        }
-        return linha;
-    }
 }
