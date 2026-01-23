@@ -1,16 +1,20 @@
 public class Medico {
     private String nomeMedico;
     private int cedulaProfissional;
-    private String especialidade;
+    private Especialidades especialidade;
     private int horaEntrada;
     private int horaSaida;
     private double salarioHora;
     private boolean ocupado;
+    private int horasConsecutivasTrabalhadas;
+    private int tempoAteFimDescanso;
+    private int tempoRestanteConsulta;
+    private Utente utenteAtual;
     private int totalPacientesAtendidos;
     private int tempoDeAtendimento;
     private int horasConsecutivasDeAtendimento;
 
-    public Medico(String nomeMedico,int cedulaProfissional, String especialidade, int horaEntrada, int horaSaida, double salarioHora) {
+    public Medico(String nomeMedico,int cedulaProfissional, Especialidades especialidade, int horaEntrada, int horaSaida, int salarioHora) {
         this.nomeMedico = nomeMedico;
         this.cedulaProfissional = cedulaProfissional;
         this.especialidade = especialidade;
@@ -20,6 +24,9 @@ public class Medico {
         this.ocupado = false;
         this.totalPacientesAtendidos = 0;
         this.tempoDeAtendimento = 0;
+    }
+
+    public Medico() {
     }
 
     public void inicioAtendimento() {
@@ -34,6 +41,66 @@ public class Medico {
     public boolean isDisponivel(int horaAtual) {
         return (horaAtual >= horaEntrada && horaAtual < horaSaida) && !ocupado;
     }
+
+    public void iniciarAtendimento(Utente utente) {
+        this.ocupado = true;
+        this.utenteAtual = utente;
+        this.horasConsecutivasTrabalhadas++; // Começa a contar horas
+
+        // Define tempo de consulta baseado na urgência [cite: 44-47]
+        switch (utente.getNivelSintoma()) {
+            case VERDE: this.tempoRestanteConsulta = 1; break;
+            case LARANJA: this.tempoRestanteConsulta = 2; break;
+            case VERMELHO: this.tempoRestanteConsulta = 3; break;
+        }
+    }
+
+    public String processarHora(int horaDoDia) {
+        String status = "";
+
+        if (tempoAteFimDescanso > 0) {
+            tempoAteFimDescanso--;
+            if (tempoAteFimDescanso == 0) {
+                horasConsecutivasTrabalhadas = 0; // Reset ao cansaço
+                status = " -> Dr. " + nomeMedico + " voltou do descanso.\n";
+            }
+            return status;
+        }
+
+        if (ocupado && tempoRestanteConsulta > 0) {
+            tempoRestanteConsulta--;
+            horasConsecutivasTrabalhadas++;
+
+            if (tempoRestanteConsulta == 0) {
+                ocupado = false;
+                totalPacientesAtendidos++;
+                status = " -> Dr. " + nomeMedico + " terminou consulta com " + utenteAtual.getNomeUtente() + ".\n";
+                utenteAtual = null;
+
+                // Verificar regra de descanso: 1h descanso a cada 5h trabalhadas
+                if (horasConsecutivasTrabalhadas >= 5) {
+                    tempoAteFimDescanso = 1;
+                    status += " -> Dr. " + nomeMedico + " entrou em pausa forçada (Cansaço).\n";
+                }
+            }
+        }
+
+        if (horaDoDia == horaSaida && !ocupado) {
+            status += " -> Dr. " + nomeMedico + " terminou o turno.\n";
+        }
+
+        return status;
+    }
+
+
+    public boolean isEmDescanso() {
+        return tempoAteFimDescanso > 0;
+    }
+
+
+
+
+
 
     public String getNomeMedico() {
         return nomeMedico;
@@ -51,11 +118,11 @@ public class Medico {
         this.cedulaProfissional = cedulaProfissional;
     }
 
-    public String getEspecialidade() {
+    public Especialidades getEspecialidade() {
         return especialidade;
     }
 
-    public void setEspecialidade(String especialidade) {
+    public void setEspecialidade(Especialidades especialidade) {
         this.especialidade = especialidade;
     }
 

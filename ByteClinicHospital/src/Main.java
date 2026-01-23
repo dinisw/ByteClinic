@@ -10,12 +10,22 @@ public class Main {
     private static FicheiroUtentes ficheiroUtentes = new FicheiroUtentes();
 
 
-    private static Medico[] medicos = ficheiroMedicos.getMedicos();
-
-    private static String sep = ";";
+    private static final String SEPARADOR = ";";
+    private static final String ARQUIVO_MEDICOS = "medicos.txt";
+    private static final String ARQUIVO_ESPECIALIDADES = "especialidade.txt";
 
     private static int hora = 0;
     private static int dia = 1;
+
+    // Variáveis de Configuração
+    public static int TEMPO_CONSULTA_VERDE = 1;
+    public static int TEMPO_CONSULTA_LARANJA = 2;
+    public static int TEMPO_CONSULTA_VERMELHO = 3;
+
+    public static int TEMPO_AGRAVAMENTO_VERDE = 3;
+    public static int TEMPO_AGRAVAMENTO_LARANJA = 3;
+    public static int TEMPO_SAIDA_VERMELHO = 2;
+
 
     //Design
     public static final String RESET = "\033[0m";
@@ -31,24 +41,21 @@ public class Main {
     public static final String PASSWORD = "admin123";
 
     static void main(String[] args) {
-        //Medico[] medicos = FicheiroMedicos.getMedicos(); //Ver como carregar os médicos pra cá
-        //Medico[] sintomas = FicheirosSintomas.getMedicos(); //Ver como carregar os sintomas pra cá
-        //Medico[] especialidades = FicheiroMedicos.getMedicos(); //Ver como especialidades os médicos pra cá
 
-        ficheiroMedicos.carregarFicheiro("medicos.txt");
-        ficheiroEspecialidade.carregarFicheiro("especialidades.txt");
-        ficheirosSintomas.carregarSintomas("sintomas.txt");
+        System.out.println("A carregar dados do sistema...");
 
+        ficheirosSintomas.carregarSintomas();           // 1º Sintomas
+        ficheiroEspecialidade.carregarFicheiro(ARQUIVO_ESPECIALIDADES);
+        ficheiroMedicos.carregarFicheiro(ARQUIVO_MEDICOS); // 3º Médicos
+        ficheiroUtentes.carregarFicheiro(ficheiroMedicos, ficheirosSintomas, SEPARADOR);
 
         Scanner ler = new Scanner(System.in);
-        String opcao = " ";
-
-
+        String opcao = "";
         do {
             exibirTitulo();
             exibirMenu();
-            System.out.print("\n" + WHITE_BOLD + "Digite a opção desejada: " + RESET);
 
+            System.out.print("\n" + WHITE_BOLD + "Digite a opção desejada: " + RESET);
             opcao = ler.nextLine();
 
             switch (opcao) {
@@ -81,7 +88,14 @@ public class Main {
                     break;
 
                 case "0":
-                    System.out.println("\n" + YELLOW + "Encerrando o sistema... Até logo!" + RESET);
+                    System.out.println("\n" + YELLOW + "A guardar dados e a encerrar..." + RESET);
+
+                    ficheirosSintomas.guardarSintomas();
+                    ficheiroEspecialidade.guardarFicheiro(ARQUIVO_ESPECIALIDADES);
+                    ficheiroMedicos.guardarTodosMedicos(ARQUIVO_MEDICOS);
+                    ficheiroUtentes.guardarFicheiro(SEPARADOR);
+
+                    System.out.println(GREEN + "Dados salvos. Até logo!" + RESET);
                     break;
                 default:
                     System.out.println("\n" + RED + "Opção inválida! Tente novamente." + RESET);
@@ -110,7 +124,8 @@ public class Main {
         if (textoTitulo.length() < LARGURA) textoTitulo += " ";
 
         String statusLabel = " Status: ";
-        String statusValor = "ONLINE";
+        String statusValor = "ONLINE - " + hora + ":00";
+        String statusCompleto = statusLabel + statusValor;
 
         int espacoDisponivel = LARGURA - statusLabel.length() - statusValor.length() - tempo.length() - 1;
         String paddingData = " ".repeat(Math.max(0, espacoDisponivel));
@@ -137,13 +152,12 @@ public class Main {
 
         String[] opcoes = {
                 "1. Triagem",
-                "2. Medicos",
+                "2. Médicos",
                 "3. Especialidades",
                 "4. Sintomas",
-                "5. Gerir o funcionamento do hospital",
+                "5. Avançar Tempo",
                 "6. Consultar estatísticas e logs",
                 "7. Configurações",
-                "8. Avançar Tempo (+1H)",
                 "0. Sair"
         };
 
@@ -165,7 +179,7 @@ public class Main {
             String bordaMeio = "╠" + "═".repeat(LARGURA) + "╣";
             String bordaInferior = "╚" + "═".repeat(LARGURA) + "╝";
 
-            String titulo = "TRIAGEM";
+            String titulo = "TRIAGEM & SALA DE ESPERA";
             int paddingTitulo = (LARGURA - titulo.length()) / 2;
             String textoTitulo = String.format("%" + paddingTitulo + "s%s%-" + paddingTitulo + "s", "", titulo, "");
             if (textoTitulo.length() < LARGURA) textoTitulo += " ";
@@ -175,13 +189,9 @@ public class Main {
             System.out.println(CYAN_BOLD + bordaMeio + RESET);
 
             String[] opcoes = {
-                    "1. Registar Novo Médico",
-                    "2. Listar Todos os Médicos (Status)",
-                    "3. Pesquisar Médico (por Cédula)",
-                    "4. Atualizar Dados de Médico",
-                    "5. Remover Médico",
-                    "6. Verificar Disponibilidade por Especialidade",
-                    "0. Sair"
+                    "1. Realizar Nova Triagem (Admissão)",
+                    "2. Ver Lista de Espera (Utentes)",
+                    "0. Voltar ao Menu Principal"
             };
 
             for (String opcao2 : opcoes) {
@@ -190,29 +200,18 @@ public class Main {
             System.out.println(CYAN_BOLD + bordaInferior + RESET);
 
             System.out.print("\n" + WHITE_BOLD + "Selecione uma opção: " + RESET);
-            opcao = ler.nextLine();
+            opcao = ler.nextLine().trim();
 
             switch (opcao) {
                 case "1":
                     registarTriagem(ler);
                     break;
                 case "2":
-                    listarMedicos(ler);
-                    break;
-                case "3":
-                    pesquisarMedico(ler);
-                    break;
-                case "4":
-                    atualizarMedico(ler);
-                    break;
-                case "5":
-                    removerMedico(ler);
-                    break;
-                case "6":
-                    listarPorEspecialidade(ler);
+                    listarFilaEspera(ler);
+                    pressionarEnter(ler);
                     break;
                 case "0":
-                    break;
+                    return;
                 default:
                     System.out.println("\n" + RED + "Opção inválida! Tente novamente." + RESET);
                     pressionarEnter(ler);
@@ -227,21 +226,23 @@ public class Main {
         try {
             System.out.print("Nome: ");
             String nome = ler.nextLine();
-            String opcao = "";
-            String[] sintomaEscolhido = new String[100];
             Sintomas[] sintomasDisponiveis = ficheirosSintomas.getSintomas();
-            Sintomas sintomasEscolhidos = new Sintomas();
+            Sintomas[] sintomasEscolhidos = new Sintomas[20];
             int qtdSelecionados = 0;
+
+            String opcao = "";
 
             do {
                 int count = 1;
-                System.out.println("\n--- SINTOMAS ---");
+                System.out.println("\n--- SINTOMAS DISPONÍVEIS ---");
                 for (Sintomas sintoma : sintomasDisponiveis) {
-                    System.out.printf("%d - %s\n", count, sintoma);
+                    if (sintoma != null) {
+                        System.out.printf("%d - %s\n", count, sintoma.getNomeSintoma());
+                    }
                     count++;
                 }
                 System.out.println("------------------------");
-                System.out.println("Digite o número do sintoma. Caso não apareça na lista, digite 'novo'");
+                System.out.println("Digite os números dos sintomas separados por espaço ou vírgula.");
                 System.out.print("Sua escolha (ou 'sair'): ");
 
                 opcao = ler.nextLine().trim();
@@ -252,63 +253,83 @@ public class Main {
                     registarSintomas(ler);
                 }
 
-
                 String[] partes = opcao.split("[,\\s]+");
 
                 for (String parte : partes) {
                     try {
                         int indice = Integer.parseInt(parte) - 1;
 
-                        if (indice >= 0 && indice < sintomasDisponiveis.length) {
-                            Sintomas sintoma = sintomasDisponiveis[indice];
+                        if (indice >= 0 && indice < sintomasDisponiveis.length && sintomasDisponiveis[indice] != null) {
+                            Sintomas sintomaSelecionado = sintomasDisponiveis[indice];
 
                             boolean jaExiste = false;
-//                            for(int i = 0; i < qtdSelecionados; i++) {
-//                                if(sintomasEscolhidos[i].equals(sintoma.getNomeSintoma())){
-//                                    jaExiste = true;
-//                                    break;
-//                                }
-//                            }
-//
-//                            if (!jaExiste) {
-//                                sintomasEscolhidos[qtdSelecionados] = sintoma.getNomeSintoma();
-//                                qtdSelecionados++;
-//                                System.out.println("Adicionado: " + sintoma);
-//                            }
+                            for(int i = 0; i < qtdSelecionados; i++) {
+                                if(sintomasEscolhidos[i].getNomeSintoma().equalsIgnoreCase(sintomaSelecionado.getNomeSintoma())){
+                                    jaExiste = true;
+                                    break;
+                                }
+                            }
+
+                            if (!jaExiste) {
+                                sintomasEscolhidos[qtdSelecionados] = sintomaSelecionado;
+                                qtdSelecionados++;
+                                System.out.println("Adicionado: " + sintomaSelecionado.getNomeSintoma());
+                            } else {
+                                System.out.println(YELLOW + "Sintoma já selecionado: " + sintomaSelecionado.getNomeSintoma() + RESET);
+                            }
 
                         } else {
-                            // Ignora silenciosamente ou avisa números fora do range
+                            System.out.println(RED + "Opção inválida: " + parte + RESET);
                         }
 
                     } catch (NumberFormatException e) {
-                        // Ignora letras/lixo
+                        //colocar log
                     }
                 }
 
                 if (qtdSelecionados > 0) {
-                    System.out.println("\nDeseja finalizar? (digite 'sair' para parar ou Enter para adicionar mais)");
-                    if (ler.nextLine().equalsIgnoreCase("sair")) break;
+                    System.out.println("\nDeseja finalizar a seleção? (digite 'sair' para terminar ou ENTER para adicionar mais)");
+                    if(ler.nextLine().equalsIgnoreCase("sair")) break;
                 }
 
             } while (true);
 
-            //sintomasEscolhidos
+            if (qtdSelecionados > 0) {
 
+                NivelSintomas nivelSintomaEscolhido = NivelSintomas.VERDE;
+                for(int i=0; i<qtdSelecionados; i++) {
+                    NivelSintomas nivel = sintomasEscolhidos[i].getNivelSintoma();
+                    if(nivel == NivelSintomas.VERMELHO) {
+                        nivelSintomaEscolhido = NivelSintomas.VERMELHO;
+                        break;
+                    }
+                    if(nivel == NivelSintomas.LARANJA) nivelSintomaEscolhido = NivelSintomas.LARANJA;
+                }
 
-            System.out.print("[ ");
-            for (int i = 0; i < qtdSelecionados; i++) {
-                //System.out.print(sintomasEscolhidos[i]);
-                if (i < qtdSelecionados - 1) System.out.print(", ");
+                String especialidadeCalculada = calcularEspecialidadeAutomaticamente(sintomasEscolhidos, qtdSelecionados);
+
+                if (especialidadeCalculada == null) {
+                    System.out.println(YELLOW + "\nSistema incerto. Sugestão: 'CLINICA GERAL'." + RESET);
+                    especialidadeCalculada = "GERAL";
+                } else {
+                    System.out.println(CYAN_BOLD + "\nDiagnóstico do Sistema: Encaminhar para " + especialidadeCalculada + RESET);
+                }
+
+                Utente novoUtente = new Utente(nome, sintomasEscolhidos, nivelSintomaEscolhido, hora, especialidadeCalculada);
+
+                ficheiroUtentes.adicionaUtente(novoUtente);
+
+                System.out.println(GREEN + "Triagem concluída! Utente na sala de espera." + RESET);
+
+                atribuirPacientesAutomaticamente();
+
+            } else {
+                System.out.println(RED + "Nenhum sintoma selecionado. Triagem cancelada." + RESET);
             }
-            System.out.println(" ]");
 
-            //Medico medico = new Medico(nome,cedula,especialidade,horaEntrada,horaSaida,salario);
-            //ficheiroMedicos.adicionarMedico(medico);
-            System.out.println(GREEN + "Médico registado com sucesso!" + RESET);
-        } catch (NumberFormatException e) {
-            System.out.println(RED + "Erro: Introduza números válidos." + RESET);
+        } catch (Exception e) {
+            System.out.println(RED + "Erro inesperado na triagem: " + e.getMessage() + RESET);
         }
-        addHora();
         pressionarEnter(ler);
     }
     //endregion
@@ -396,19 +417,45 @@ public class Main {
                 pressionarEnter(ler);
                 return;
             }
+
+            // --- INÍCIO DA CORREÇÃO ---
+            System.out.println("Especialidades disponíveis:");
+            for (Especialidades esp : Especialidades.values()) {
+                System.out.print(esp.getCodigo() + " ");
+            }
+            System.out.println();
+
             System.out.print("Especialidade (Sigla): ");
-            String especialidade = ler.nextLine();
+            String especialidadeStr = ler.nextLine().trim().toUpperCase();
+
+            Especialidades especialidadeSelecionada = null;
+
+            for (Especialidades esp : Especialidades.values()) {
+                if (esp.getCodigo().equalsIgnoreCase(especialidadeStr)) {
+                    especialidadeSelecionada = esp;
+                    break;
+                }
+            }
+
+            if (especialidadeSelecionada == null) {
+                System.out.println(RED + "Erro: Especialidade não encontrada. Registo cancelado." + RESET);
+                pressionarEnter(ler);
+                return;
+            }
+
             System.out.print("Hora Entrada (0-23): ");
             int horaEntrada = Integer.parseInt(ler.nextLine());
             System.out.print("Hora Saída (0-23): ");
             int horaSaida = Integer.parseInt(ler.nextLine());
             System.out.print("Salário Hora: ");
             int salario = Integer.parseInt(ler.nextLine());
-            Medico medicos = new Medico(nome, cedula, especialidade, horaEntrada, horaSaida, salario);
+            ler.nextLine();
+
+            Medico medicos = new Medico(nome, cedula, especialidadeSelecionada, horaEntrada, horaSaida, salario);
+
             ficheiroMedicos.adicionarMedico(medicos);
-            ficheiroMedicos.guardarFicheiroMedico("medicos.txt");
-            System.out.println(GREEN + "Médico registado!" + RESET);
-            GestorLogs.registarSucesso("Novo Médico registado: " + nome + " (Cédula: " + cedula + ")");
+
+            System.out.println(GREEN + "Médico registado com sucesso!" + RESET);
         } catch (NumberFormatException e) {
             System.out.println(RED + "Erro: Introduza números válidos." + RESET);
             GestorLogs.registarErro("RegistarMedico", "Input inválido (não é número): " + e.getMessage());
@@ -473,26 +520,67 @@ public class Main {
 
     //region ATUALIZAR MEDICO
     private static void atualizarMedico(Scanner ler) {
-        System.out.print("Cédula do médico a editar: ");
-        int cedula = Integer.parseInt(ler.nextLine());
+        System.out.println("\n" + CYAN_BOLD + "--- ATUALIZAR MÉDICO ---" + RESET);
 
-        if (ficheiroMedicos.procurarMedicoPorCedula(cedula) == null) {
-            System.out.println(RED + "Não Existe." + RESET);
+        int cedula = -1;
+        try {
+            System.out.print("Cédula do médico a editar: ");
+            cedula = Integer.parseInt(ler.nextLine());
+        } catch (NumberFormatException e) {
+            System.out.println(RED + "Cédula inválida." + RESET);
+            pressionarEnter(ler);
             return;
         }
-        System.out.print("Novo Nome: ");
-        String nome = ler.nextLine();
-        System.out.print("Nova Especialidade: ");
-        String especialidade = ler.nextLine();
-        System.out.print("Nova Entrada: ");
-        int entrada = Integer.parseInt(ler.nextLine());
-        System.out.print("Nova Saída: ");
-        int saida = Integer.parseInt(ler.nextLine());
-        System.out.print("Novo Salário: ");
-        int salario = Integer.parseInt(ler.nextLine());
 
-        ficheiroMedicos.atualizarMedico(cedula, nome, especialidade, entrada, saida, salario);
-        System.out.println(GREEN + "Atualizado com sucesso" + RESET);
+        if (ficheiroMedicos.procurarMedicoPorCedula(cedula) == null) {
+            System.out.println(RED + "Médico não encontrado." + RESET);
+            pressionarEnter(ler);
+            return;
+        }
+
+        try {
+            System.out.print("Novo Nome: ");
+            String nome = ler.nextLine();
+
+            System.out.print("Nova Especialidade (Sigla): ");
+            String sigla = ler.nextLine().trim();
+
+            Especialidades especialidadeSelecionada = null;
+
+            for (Especialidades esp : Especialidades.values()) {
+                if (esp.getCodigo().equalsIgnoreCase(sigla)) {
+                    especialidadeSelecionada = esp;
+                    break;
+                }
+            }
+
+            if (especialidadeSelecionada == null) {
+                System.out.println(RED + "Erro: Especialidade não existe. Atualização cancelada." + RESET);
+                pressionarEnter(ler);
+                return;
+            }
+
+            System.out.print("Nova Entrada (0-23): ");
+            int entrada = Integer.parseInt(ler.nextLine());
+
+            System.out.print("Nova Saída (0-23): ");
+            int saida = Integer.parseInt(ler.nextLine());
+
+            System.out.print("Novo Salário: ");
+            int salario = Integer.parseInt(ler.nextLine());
+
+            boolean sucesso = ficheiroMedicos.atualizarMedico(cedula, nome, especialidadeSelecionada, entrada, saida, salario);
+
+            if(sucesso) {
+                System.out.println(GREEN + "Atualizado com sucesso" + RESET);
+            } else {
+                System.out.println(RED + "Erro ao atualizar." + RESET);
+            }
+
+        } catch (NumberFormatException e) {
+            System.out.println(RED + "Erro: Introduza apenas números nos campos de horário/salário." + RESET);
+        }
+        pressionarEnter(ler);
     }
     //endregion
 
@@ -510,15 +598,44 @@ public class Main {
 
     //region LISTAR ESPECIALIDADE MEDICO
     private static void listarPorEspecialidade(Scanner ler) {
-        System.out.print("Qual a especialidade? ");
-        String especialidade = ler.nextLine();
-        Medico[] lista = ficheiroMedicos.procurarMedicoPorEspecialidade(especialidade);
-        if (lista != null) {
+        System.out.println("\n" + CYAN_BOLD + "--- LISTAR POR ESPECIALIDADE ---" + RESET);
+
+        System.out.println("Siglas disponíveis: ");
+        for (Especialidades e : Especialidades.values()) {
+            System.out.print(e.getCodigo() + " ");
+        }
+        System.out.println();
+
+        System.out.print("Qual a especialidade (Sigla)? ");
+        String input = ler.nextLine().trim();
+
+        Especialidades especialidadeSelecionada = null;
+
+        for (Especialidades esp : Especialidades.values()) {
+            if (esp.getCodigo().equalsIgnoreCase(input)) {
+                especialidadeSelecionada = esp;
+                break;
+            }
+        }
+
+        if (especialidadeSelecionada == null) {
+            System.out.println(RED + "Erro: Especialidade não encontrada." + RESET);
+            pressionarEnter(ler);
+            return;
+        }
+
+        Medico[] lista = ficheiroMedicos.procurarMedicoPorEspecialidade(especialidadeSelecionada);
+
+        if (lista != null && lista.length > 0) {
+            System.out.println("\nMédicos de " + especialidadeSelecionada.name() + ":");
+            System.out.println("-------------------------------------------------");
             for (Medico medico : lista) {
-                System.out.println(medico);
+                if (medico != null) {
+                    System.out.println(medico);
+                }
             }
         } else {
-            System.out.println(RED + "Nenhum médico com essa especialidade." + RESET);
+            System.out.println(YELLOW + "Nenhum médico encontrado com essa especialidade." + RESET);
         }
         pressionarEnter(ler);
     }
@@ -907,119 +1024,162 @@ public class Main {
     //endregion
 
     private static void gerirHospital(Scanner ler) {
-        System.out.println("\n--- Gestão do Hospital ---");
-        pressionarEnter(ler);
+        avancarUmaHora(ler);
     }
 
     private static void consultarEstatisticas(Scanner ler) {
-        System.out.println("\n" + CYAN_BOLD + "--- ESTATÍSTICAS E LOGS ---" + RESET);
-        System.out.println("Dia atual:" + dia + "| Hora: " + hora + "h");
-        System.out.println("--------------------------------");
+        System.out.println("\n" + CYAN_BOLD + "--- ESTATÍSTICAS DO HOSPITAL (Dia " + dia + ") ---" + RESET);
 
-        System.out.println("1. Ver Logs de Erros e Atividade");
-        System.out.println("2. Ver Média de Utentes (Por Dia)");
-        System.out.println("3. Ver Tabela de Salários Médicos (Diário)");
-        System.out.println("0. Voltar");
-        System.out.print("\nOpção: ");
-        String opcao = ler.nextLine();
+        Medico[] medicos = ficheiroMedicos.getListaMedicos();
+        Utente[] utentes = ficheiroUtentes.getPacientes();
+        int totalUtentes = ficheiroUtentes.getTotalDePacientes();
+        int totalMedicos = ficheiroMedicos.getTotalMedicos();
 
-        switch (opcao) {
-            case "1":
-                GestorLogs.lerLogs();
-                break;
-            case "2":
-                mostrarMediaUtentes();
-                break;
-            case "3":
-                mostrarTabelaSalario();
-                break;
-            case "0":
-                return;
-            default:
-                System.out.println(RED + "Opção inválida." + RESET);
+        System.out.println("\n" + WHITE_BOLD + "1. Média de Utentes Atendidos/Dia" + RESET);
+        int totalAtendimentos = 0;
+        for (int i = 0; i < totalMedicos; i++) {
+            if (medicos[i] != null) {
+                totalAtendimentos += medicos[i].getTotalPacientesAtendidos();
+            }
         }
+        double media = (dia > 0) ? (double) totalAtendimentos / dia : 0;
+        System.out.printf("Total Atendidos: %d | Média Diária: %.2f utentes/dia\n", totalAtendimentos, media);
+
+
+        System.out.println("\n" + WHITE_BOLD + "2. Salários Diários Previstos" + RESET);
+        System.out.printf("%-20s %-10s %-10s %s\n", "MÉDICO", "CARGA(H)", "€/HORA", "TOTAL/DIA");
+        System.out.println("-------------------------------------------------------");
+
+        for (int i = 0; i < totalMedicos; i++) {
+            Medico m = medicos[i];
+            if (m != null) {
+                int horasTrabalho = m.getHoraSaida() - m.getHoraEntrada();
+                if (horasTrabalho < 0) horasTrabalho += 24;
+
+                double salarioDia = horasTrabalho * m.getSalarioHora();
+
+                System.out.printf("%-20s %-10d %-10.2f %.2f €\n",
+                        m.getNomeMedico(), horasTrabalho, m.getSalarioHora(), salarioDia);
+            }
+        }
+
+
+        System.out.println("\n" + WHITE_BOLD + "3. Ocorrência de Sintomas" + RESET);
+        Sintomas[] listaSintomas = ficheirosSintomas.getSintomas(); // Pega a lista base de sintomas
+
+        if (listaSintomas != null) {
+            for (Sintomas sRef : listaSintomas) {
+                if (sRef != null) {
+                    int contador = 0;
+                    for (int u = 0; u < totalUtentes; u++) {
+                        if (utentes[u] != null && utentes[u].getSintomas() != null) {
+                            for (Sintomas sUtente : utentes[u].getSintomas()) {
+                                if (sUtente != null && sUtente.getNomeSintoma().equalsIgnoreCase(sRef.getNomeSintoma())) {
+                                    contador++;
+                                }
+                            }
+                        }
+                    }
+                    if (contador > 0) {
+                        System.out.printf("- %-20s: %d casos\n", sRef.getNomeSintoma(), contador);
+                    }
+                }
+            }
+        }
+
+        System.out.println("\n" + WHITE_BOLD + "4. Top 3 Especialidades (%)" + RESET);
+
+        Especialidade[] especialidades = ficheiroEspecialidade.getLista();
+        int qtdEspec = ficheiroEspecialidade.getTotal();
+
+        String[] nomesEsp = new String[qtdEspec];
+        int[] contagens = new int[qtdEspec];
+
+        for (int i = 0; i < qtdEspec; i++) {
+            nomesEsp[i] = especialidades[i].getSigla();
+            contagens[i] = 0;
+
+            for (int u = 0; u < totalUtentes; u++) {
+                if (utentes[u] != null &&
+                        utentes[u].getEspecialidadeEncaminhada() != null &&
+                        utentes[u].getEspecialidadeEncaminhada().equalsIgnoreCase(especialidades[i].getSigla())) {
+                    contagens[i]++;
+                }
+            }
+        }
+
+        for (int i = 0; i < qtdEspec - 1; i++) {
+            for (int j = 0; j < qtdEspec - 1 - i; j++) {
+                if (contagens[j] < contagens[j + 1]) {
+                    int tempC = contagens[j];
+                    contagens[j] = contagens[j + 1];
+                    contagens[j + 1] = tempC;
+                    String tempN = nomesEsp[j];
+                    nomesEsp[j] = nomesEsp[j + 1];
+                    nomesEsp[j + 1] = tempN;
+                }
+            }
+        }
+
+        int top = Math.min(3, qtdEspec);
+        for (int i = 0; i < top; i++) {
+            double percentagem = (totalUtentes > 0) ? ((double) contagens[i] / totalUtentes) * 100 : 0;
+            System.out.printf("%dº. %-10s: %d utentes (%.1f%%)\n", (i + 1), nomesEsp[i], contagens[i], percentagem);
+        }
+
         pressionarEnter(ler);
     }
 
-    private static void mostrarMediaUtentes() {
-        int totalAtendidos = 0;
-        Medico[] lista = ficheiroMedicos.getListaMedicos();
-        int totalMedicos = ficheiroMedicos.getTotalMedicos();
-
-        for (int i = 0; i < totalMedicos; i++) {
-            if (lista[i] != null) {
-                totalAtendidos += lista[i].getTotalPacientesAtendidos();
-            }
-        }
-        double media = (dia > 0) ? (double) totalAtendidos / dia : totalAtendidos;
-
-        System.out.println("\n" + CYAN_BOLD + "--- ESTATÍSTICAS GERAIS ---" + RESET);
-        System.out.println("Total de Médicos: " + totalMedicos);
-        System.out.println("Total de Sintomas Registados: " + ficheirosSintomas.getSintomas().length);
-        System.out.println("---------------------------");
-        System.out.println("Total de Utentes Atendidos: " + totalAtendidos);
-        System.out.printf("Média de Utentes por Dia: %.2f%n", media);
-        System.out.println("---------------------------");
-    }
-
-    private static void mostrarTabelaSalario() {
-        Medico[] lista = ficheiroMedicos.getListaMedicos();
-        int total = ficheiroMedicos.getTotalMedicos();
-
-        if (total == 0) {
-            System.out.println(YELLOW + "Não existem médicos registados para calcular salários." + RESET);
-            return;
-        }
-        System.out.println("\n" + CYAN_BOLD + "--- TABELA DE VENCIMENTOS DIÁRIOS ---" + RESET);
-        String headerFormat = "| %-20s | %-10s | %-12s | %-12s | %-15s |%n";
-        String rowFormat    = "| %-20s | %-10d | %02d:00-%02d:00  | %-12d | %-14s |%n";
-
-        System.out.format("+----------------------+------------+--------------+--------------+-----------------+%n");
-        System.out.format(headerFormat, "NOME MÉDICO", "CÉDULA", "TURNO", "HORAS/DIA", "SALÁRIO/DIA");
-        System.out.format("+----------------------+------------+--------------+--------------+-----------------+%n");
-        double totalSalarioDia = 0;
-
-        for (int i = 0; i < total; i++) {
-            Medico medico = lista[i];
-            if (medico != null) {
-                int entrada = medico.getHoraEntrada();
-                int saida = medico.getHoraSaida();
-                int horasTrabalho;
-
-                if (saida >= entrada) {
-                    horasTrabalho = saida - entrada;
-                } else {
-                    horasTrabalho = (24 - entrada) + saida;
-                }
-
-                double salarioDia = horasTrabalho * medico.getSalarioHora();
-                totalSalarioDia += salarioDia;
-
-                System.out.format(rowFormat,
-                        medico.getNomeMedico(),medico.getCedulaProfissional(),entrada, saida, horasTrabalho, String.format("%.2f €", salarioDia));
-                }
-            }
-        System.out.format("+----------------------+------------+--------------+--------------+-----------------+%n");
-        System.out.printf("| %62s | " + GREEN + "%-14s" + RESET + " |%n", "TOTAL DIÁRIO:", String.format("%.2f €", totalSalarioDia));
-        System.out.format("+----------------------+------------+--------------+--------------+-----------------+%n");
-
-    }
-
     private static void configuracoes(Scanner ler) {
-        System.out.println("\n--- CONFIGURAÇÕES ---");
-        System.out.println("Digite a password para acessar o menu (0 para voltar):");
-        String tentativaDeAcesso = ler.nextLine().trim().toLowerCase();
+        System.out.println("\n--- ÁREA DE CONFIGURAÇÕES (ADMIN) ---");
 
-        if (tentativaDeAcesso.equals("0"))
+        System.out.print("Password: ");
+        String pass = ler.nextLine().trim();
+        if (!pass.equals(PASSWORD)) {
+            System.out.println(RED + "Acesso Negado." + RESET);
+            pressionarEnter(ler);
             return;
-
-        if (tentativaDeAcesso.equals(PASSWORD)) {
-            System.out.println(GREEN + "Acesso Autorizado" + RESET);
-            pressionarEnter(ler);
-        } else {
-            System.out.println(RED + "Senha incorreta." + RESET);
-            pressionarEnter(ler);
         }
+
+        String opcao = "";
+        do {
+            System.out.println("\n" + CYAN_BOLD + "--- CONFIGURAÇÕES ATUAIS ---" + RESET);
+            System.out.println("1. Tempos de Consulta (Atual: " + TEMPO_CONSULTA_VERDE + "/" + TEMPO_CONSULTA_LARANJA + "/" + TEMPO_CONSULTA_VERMELHO + ")");
+            System.out.println("2. Tempos de Agravamento (Atual: " + TEMPO_AGRAVAMENTO_VERDE + "/" + TEMPO_AGRAVAMENTO_LARANJA + "/" + TEMPO_SAIDA_VERMELHO + ")");
+            System.out.println("0. Voltar");
+
+            System.out.print("Opção: ");
+            opcao = ler.nextLine();
+
+            try {
+                switch (opcao) {
+                    case "1":
+                        System.out.print("Novo tempo Baixa (Verde): ");
+                        TEMPO_CONSULTA_VERDE = Integer.parseInt(ler.nextLine());
+                        System.out.print("Novo tempo Média (Laranja): ");
+                        TEMPO_CONSULTA_LARANJA = Integer.parseInt(ler.nextLine());
+                        System.out.print("Novo tempo Urgente (Vermelho): ");
+                        TEMPO_CONSULTA_VERMELHO = Integer.parseInt(ler.nextLine());
+                        System.out.println(GREEN + "Tempos atualizados!" + RESET);
+                        break;
+                    case "2":
+                        System.out.print("Horas p/ agravar Verde->Laranja: ");
+                        TEMPO_AGRAVAMENTO_VERDE = Integer.parseInt(ler.nextLine());
+                        System.out.print("Horas p/ agravar Laranja->Vermelho: ");
+                        TEMPO_AGRAVAMENTO_LARANJA = Integer.parseInt(ler.nextLine());
+                        System.out.print("Horas p/ saída (Vermelho): ");
+                        TEMPO_SAIDA_VERMELHO = Integer.parseInt(ler.nextLine());
+                        System.out.println(GREEN + "Critérios atualizados!" + RESET);
+                        break;
+                    case "0":
+                        break;
+                    default:
+                        System.out.println("Opção inválida.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println(RED + "Erro: Insira apenas números inteiros." + RESET);
+            }
+        } while (!opcao.equals("0"));
     }
 
     private static void pressionarEnter(Scanner ler) {
@@ -1027,22 +1187,242 @@ public class Main {
         ler.nextLine();
     }
 
-    private static void addHora() {
+
+
+    private static void listarFilaEspera(Scanner ler) {
+        System.out.println("\033[H\033[2J");
+        System.out.flush();
+        System.out.println(CYAN_BOLD + "--- LISTA DE ESPERA (TRIAGEM FEITA) ---" + RESET);
+
+        Utente[] lista = ficheiroUtentes.getPacientes();
+        int total = ficheiroUtentes.getTotalDePacientes();
+        int naFila = 0;
+
+        System.out.printf(WHITE_BOLD + "%-20s %-15s %-10s %-15s %s\n" + RESET,
+                "NOME", "URGÊNCIA", "ESPERA", "ESPECIALIDADE", "STATUS");
+        System.out.println("--------------------------------------------------------------------------------");
+
+        for (int i = 0; i < total; i++) {
+            Utente u = lista[i];
+
+            if (u != null && !u.isEmAtendimento()) {
+                naFila++;
+
+                String corUrgencia = RESET;
+                if (u.getNivelSintoma() == NivelSintomas.VERMELHO) corUrgencia = RED;
+                else if (u.getNivelSintoma() == NivelSintomas.LARANJA) corUrgencia = YELLOW;
+                else if (u.getNivelSintoma() == NivelSintomas.VERDE) corUrgencia = GREEN;
+
+                String nomeEspecialidade = (u.getEspecialidadeEncaminhada() != null) ? u.getEspecialidadeEncaminhada() : "---";
+
+                System.out.printf("%-20s " + corUrgencia + "%-15s" + RESET + " %-10s %-15s %s\n",
+                        u.getNomeUtente(),
+                        u.getNivelSintoma().getCor(),
+                        u.getTempoEsperaAtual() + "h",
+                        nomeEspecialidade,
+                        "AGUARDA VAGA");
+            }
+        }
+
+        if (naFila == 0) {
+            System.out.println(GREEN + "\nExcelente! A sala de espera está vazia." + RESET);
+        } else {
+            System.out.println("\nTotal em espera: " + naFila);
+        }
+
+        pressionarEnter(ler);
+    }
+
+    private static String calcularEspecialidadeAutomaticamente(Sintomas[] sintomasEscolhidos, int qtd) {
+        if (qtd == 0) return "Geral";
+
+        NivelSintomas urgenciaMaxima = NivelSintomas.VERDE;
+
+        for (int i = 0; i < qtd; i++) {
+            NivelSintomas nivelAtual = sintomasEscolhidos[i].getNivelSintoma();
+
+            if (nivelAtual == NivelSintomas.VERMELHO) {
+                urgenciaMaxima = NivelSintomas.VERMELHO;
+                break;
+            }
+            if (nivelAtual == NivelSintomas.LARANJA && urgenciaMaxima == NivelSintomas.VERDE) {
+                urgenciaMaxima = NivelSintomas.LARANJA;
+            }
+        }
+
+        String[] sintomasEncontrados = new String[qtd];
+        int[] contadores = new int[qtd];
+        int totalSiglas = 0;
+
+        for (int i = 0; i < qtd; i++) {
+            if (sintomasEscolhidos[i].getNivelSintoma() == urgenciaMaxima) {
+
+                Especialidades espEnum = sintomasEscolhidos[i].getEspecialidadesAssociadas();
+                if (espEnum == null) continue;
+
+                String sigla = espEnum.getCodigo();
+
+                boolean encontrado = false;
+                for (int k = 0; k < totalSiglas; k++) {
+                    if (sintomasEncontrados[k].equals(sigla)) {
+                        contadores[k]++;
+                        encontrado = true;
+                        break;
+                    }
+                }
+
+                if (!encontrado) {
+                    sintomasEncontrados[totalSiglas] = sigla;
+                    contadores[totalSiglas] = 1;
+                    totalSiglas++;
+                }
+            }
+        }
+
+        String maiorQtdDeSintomasIguais = null;
+        int maiorContagem = -1;
+
+        for (int i = 0; i < totalSiglas; i++) {
+            if (contadores[i] > maiorContagem) {
+                maiorContagem = contadores[i];
+                maiorQtdDeSintomasIguais = sintomasEncontrados[i];
+            }
+        }
+
+        return maiorQtdDeSintomasIguais;
+    }
+
+    private static void avancarUmaHora(Scanner ler) {
+
         if (hora == 23) {
             hora = 0;
-            dia ++;
-            GestorLogs.registarSucesso("Novo dia: Dia " + dia);
+            dia++;
+            System.out.println(YELLOW + ">>> UM NOVO DIA COMEÇOU (Dia " + dia + ") <<<" + RESET);
         } else {
             hora++;
         }
-        Medico[] lista = ficheiroMedicos.getListaMedicos();
-        for (int i = 0; i < ficheiroMedicos.getTotalMedicos(); i++ )
-            if (lista[i] != null) {
-                //for (var medico : medicos){
-                //medico.addHoraMedico();
-                lista[i].addHoraMedico();
+
+        System.out.println(YELLOW + "\n>>> AVANÇANDO TEMPO... (Nova Hora: " + hora + ":00)" + RESET);
+        String notificacoes = "";
+
+
+        Medico[] medicos = ficheiroMedicos.getListaMedicos();
+        for (int i = 0; i < ficheiroMedicos.getTotalMedicos(); i++) {
+            if (medicos[i] != null) {
+                String logMedico = medicos[i].processarHora(hora);
+                if (!logMedico.isEmpty()) notificacoes += logMedico;
             }
-        //addHoraUtente()
+        }
+
+        Utente[] utentes = ficheiroUtentes.getPacientes();
+        int totalUtentes = ficheiroUtentes.getTotalDePacientes();
+
+        for (int i = 0; i < totalUtentes; i++) {
+            Utente utente = utentes[i];
+
+            if (utente != null && !utente.isEmAtendimento()) {
+                utente.incrementarEspera();
+                int espera = utente.getTempoEsperaAtual();
+                NivelSintomas nivel = utente.getNivelSintoma();
+
+                if (nivel == NivelSintomas.VERDE && espera >= TEMPO_AGRAVAMENTO_VERDE) {
+                    utente.setNivelSintoma(NivelSintomas.LARANJA);
+                    utente.resetarTempoEspera();
+                    notificacoes += " ! ATENÇÃO: Utente " + utente.getNomeUtente() + " agravou para LARANJA (Espera excessiva).\n";
+                }
+
+            else if (nivel == NivelSintomas.LARANJA && espera >= TEMPO_AGRAVAMENTO_LARANJA) {
+                    utente.setNivelSintoma(NivelSintomas.VERMELHO);
+                    utente.resetarTempoEspera();
+                    notificacoes += " !!! PERIGO: Utente " + utente.getNomeUtente() + " agravou para VERMELHO.\n";
+                }
+
+            else if (nivel == NivelSintomas.VERMELHO && espera >= TEMPO_SAIDA_VERMELHO) {
+                    notificacoes += " X UTENTE PERDIDO: " + utente.getNomeUtente() + " abandonou/transferido por falta de atendimento.\n";
+
+                    if (ficheiroUtentes.removerUtente(utente)) {
+                        i--;
+                        totalUtentes--;
+                    }
+                }
+            }
+        }
+
+        String logAtribuicao = atribuirPacientesAutomaticamente();
+
+        if (!logAtribuicao.isEmpty()) {
+            System.out.println(CYAN_BOLD + "--- NOVAS ATRIBUIÇÕES ---" + RESET);
+            System.out.println(logAtribuicao);
+        }
+
+        if (!notificacoes.isEmpty()) {
+            System.out.println(CYAN_BOLD + "--- REGISTO DE OCORRÊNCIAS ---" + RESET);
+            System.out.println(notificacoes);
+        } else {
+            System.out.println("Nenhuma alteração crítica registada nesta hora.");
+        }
+
+        pressionarEnter(ler);
+    }
+
+    private static String atribuirPacientesAutomaticamente() {
+        StringBuilder log = new StringBuilder();
+        Medico[] medicos = ficheiroMedicos.getListaMedicos();
+        Utente[] listaEspera = ficheiroUtentes.getPacientes();
+
+        for (int i = 0; i < ficheiroMedicos.getTotalMedicos(); i++) {
+            Medico medico = medicos[i];
+
+            if (medico != null && medico.isDisponivel(hora) && !medico.isEmDescanso()) {
+
+                Utente candidato = null;
+
+                for (int j = 0; j < ficheiroUtentes.getTotalDePacientes(); j++) {
+                    Utente utente = listaEspera[j];
+
+                    if (utente != null && !utente.isEmAtendimento() && utente.getEspecialidadeEncaminhada() != null && medico.getEspecialidade() != null && utente.getEspecialidadeEncaminhada().equalsIgnoreCase(medico.getEspecialidade().getCodigo())) {
+                        if (candidato == null) {
+                            candidato = utente;
+                        }
+                        else {
+                            int pesoAtual = getNivelDeUrgencia(utente.getNivelSintoma());
+                            int pesoCandidato = getNivelDeUrgencia(candidato.getNivelSintoma());
+
+                            if (pesoAtual > pesoCandidato) {
+                                candidato = utente;
+                            }
+                            else if (pesoAtual == pesoCandidato) {
+                                if (utente.getHoraEntrada() < candidato.getHoraEntrada()) {
+                                    candidato = utente;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (candidato != null) {
+                    medico.iniciarAtendimento(candidato);
+                    candidato.setMedico(medico);
+                    candidato.setEmAtendimento(true);
+
+                    log.append(GREEN + " -> SUCESSO: " + candidato.getNomeUtente()
+                            + " (" + candidato.getNivelSintoma() + ") encaminhado para Dr. "
+                            + medico.getNomeMedico() + "\n" + RESET);
+                }
+            }
+        }
+        return log.toString();
+    }
+
+    private static int getNivelDeUrgencia(NivelSintomas nivel) {
+        if (nivel == null) return 0;
+
+        switch (nivel.name()) {
+            case "VERMELHO": return 3;
+            case "LARANJA": return 2;
+            case "VERDE": return 1;
+            default: return 0;
+        }
     }
 
 }
