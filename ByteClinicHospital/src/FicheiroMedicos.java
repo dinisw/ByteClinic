@@ -11,10 +11,10 @@ public class FicheiroMedicos {
         this.totalMedicos = 0;
     }
     //region CARREGAR FICHEIRO
-    public void carregarFicheiro(String medicos) {
-        File ficheiro = new File("medicos.txt");
+    public void carregarFicheiro(String caminho, String separador) {
+        File ficheiro = new File(caminho);
         if (!ficheiro.exists()) {
-            System.out.println("O ficheiro" + medicos + "não existe!");
+            System.out.println("O ficheiro " + caminho + " não existe!");
             return;
         }
         try {
@@ -22,22 +22,42 @@ public class FicheiroMedicos {
             while (ler.hasNextLine()) {
                 String linha = ler.nextLine();
                 if (linha.trim().isEmpty()) continue;
-                String[] dados = linha.split(";");
+
+                String[] dados = linha.split(separador);
+
                 if (dados.length == 6) {
                     String nomeMedico = dados[0];
-                    int cedula  = Integer.parseInt(dados[1]);
-                    String especialidadeStr = dados[2];
-                    Especialidades especialidade = Especialidades.ORTOPEDIA; //CORRRIGIR VITOR
+                    int cedula = Integer.parseInt(dados[1]);
+                    String especialidadeStr = dados[2].trim();
+
+                    Especialidades especialidade = null;
+
+                    for (Especialidades esp : Especialidades.values()) {
+                        if (esp.getCodigo().equalsIgnoreCase(especialidadeStr)) {
+                            especialidade = esp;
+                            break;
+                        }
+                    }
+
+                    if (especialidade == null) {
+                        System.out.println("Aviso: Especialidade '" + especialidadeStr + "' desconhecida para o médico " + nomeMedico + ". A ignorar registo.");
+                        continue;
+                    }
+
                     int horaEntrada = Integer.parseInt(dados[3]);
                     int horaSaida = Integer.parseInt(dados[4]);
                     int salarioHora = Integer.parseInt(dados[5]);
-                    Medico medico = new Medico(nomeMedico,cedula, especialidade, horaEntrada, horaSaida, salarioHora);
+
+                    Medico medico = new Medico(nomeMedico, cedula, especialidade, horaEntrada, horaSaida, salarioHora);
                     adicionarMedico(medico);
                 }
             }
             System.out.println("Médicos carregados: " + totalMedicos);
+            ler.close();
         } catch (FileNotFoundException e) {
-            System.out.println("Erro ao carregar o ficheiro" + e.getMessage());
+            System.out.println("Erro ao carregar o ficheiro: " + e.getMessage());
+        } catch (NumberFormatException e) {
+            System.out.println("Erro de formato nos dados do ficheiro.");
         }
     }
     //endregion

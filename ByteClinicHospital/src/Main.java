@@ -12,7 +12,8 @@ public class Main {
 
     private static final String SEPARADOR = ";";
     private static final String ARQUIVO_MEDICOS = "medicos.txt";
-    private static final String ARQUIVO_ESPECIALIDADES = "especialidade.txt";
+    private static final String ARQUIVO_SINTOMAS = "sintomas.txt";
+    private static final String ARQUIVO_ESPECIALIDADES = "especialidades.txt";
 
     private static int hora = 0;
     private static int dia = 1;
@@ -44,9 +45,9 @@ public class Main {
 
         System.out.println("A carregar dados do sistema...");
 
-        ficheirosSintomas.carregarSintomas();           // 1º Sintomas
-        ficheiroEspecialidade.carregarFicheiro(ARQUIVO_ESPECIALIDADES);
-        ficheiroMedicos.carregarFicheiro(ARQUIVO_MEDICOS); // 3º Médicos
+        ficheirosSintomas.carregarSintomas(ARQUIVO_SINTOMAS, SEPARADOR);
+        ficheiroEspecialidade.carregarFicheiro(ARQUIVO_ESPECIALIDADES, SEPARADOR);
+        ficheiroMedicos.carregarFicheiro(ARQUIVO_MEDICOS, SEPARADOR);
         ficheiroUtentes.carregarFicheiro(ficheiroMedicos, ficheirosSintomas, SEPARADOR);
 
         Scanner ler = new Scanner(System.in);
@@ -117,7 +118,7 @@ public class Main {
         if (textoTitulo.length() < LARGURA) textoTitulo += " ";
 
         String statusLabel = " Status: ";
-        String statusValor = "ONLINE - " + hora + ":00";
+        String statusValor = "ONLINE - " + hora + ":00h";
         String statusCompleto = statusLabel + statusValor;
 
         int espacoDisponivel = LARGURA - statusLabel.length() - statusValor.length() - dataHora.length() - 1;
@@ -203,7 +204,6 @@ public class Main {
                     break;
                 case "2":
                     listarFilaEspera(ler);
-                    pressionarEnter(ler);
                     break;
                 case "0":
                     return;
@@ -217,28 +217,40 @@ public class Main {
 
     //region TRIAGEM
     private static void registarTriagem(Scanner ler) {
-        System.out.println("\n" + CYAN_BOLD + "--- TRIAGEM---" + RESET);
+        System.out.println("\n" + CYAN_BOLD + "--- TRIAGEM (ADMISSÃO) ---" + RESET);
         try {
-            System.out.print("Nome: ");
+            System.out.print("Nome do Utente: ");
             String nome = ler.nextLine();
-            Sintomas[] sintomasDisponiveis = ficheirosSintomas.getSintomas();
+
             Sintomas[] sintomasEscolhidos = new Sintomas[20];
             int qtdSelecionados = 0;
 
             String opcao = "";
 
             do {
+                Sintomas[] sintomasDisponiveis = ficheirosSintomas.getSintomas();
+
+                System.out.println("\n" + CYAN_BOLD + "--- SELECIONE OS SINTOMAS ---" + RESET);
+
                 int count = 1;
-                System.out.println("\n--- SINTOMAS DISPONÍVEIS ---");
                 for (Sintomas sintoma : sintomasDisponiveis) {
                     if (sintoma != null) {
-                        System.out.printf("%d - %s\n", count, sintoma.getNomeSintoma());
+                        System.out.printf("%02d - %s\n", count, sintoma.getNomeSintoma());
                     }
                     count++;
                 }
+
+                if (qtdSelecionados > 0) {
+                    System.out.println(YELLOW + "------------------------");
+                    System.out.print("Atualmente selecionados: ");
+                    for(int i=0; i<qtdSelecionados; i++) System.out.print(sintomasEscolhidos[i].getNomeSintoma() + "; ");
+                    System.out.println(RESET);
+                }
+
                 System.out.println("------------------------");
-                System.out.println("Digite os números dos sintomas separados por espaço ou vírgula.");
-                System.out.print("Sua escolha (ou 'sair'): ");
+                System.out.println(GREEN + "0 - [ + ADICIONAR NOVO SINTOMA AO SISTEMA + ]" + RESET);
+                System.out.println("Digite os códigos separados por vírgula (ex: 1, 3).");
+                System.out.print("Escolha (ou 'sair' para finalizar): ");
 
                 opcao = ler.nextLine().trim();
 
@@ -246,61 +258,69 @@ public class Main {
                     break;
                 }
 
-                String[] partes = opcao.split("[,\\s]+");
+                String[] partes = opcao.split("\\s*,\\s*");
 
                 for (String parte : partes) {
+                    if (parte.isEmpty()) continue;
+
+                    if (parte.equals("0")) {
+                        System.out.println(YELLOW + ">>> Redirecionando para criação de sintoma..." + RESET);
+                        registarSintomas(ler);
+                        System.out.println(YELLOW + ">>> Retornando à triagem de " + nome + "..." + RESET);
+                        continue;
+                    }
+
+                    Sintomas sintomaEncontrado = null;
+
                     try {
                         int indice = Integer.parseInt(parte) - 1;
-
                         if (indice >= 0 && indice < sintomasDisponiveis.length && sintomasDisponiveis[indice] != null) {
-                            Sintomas sintomaSelecionado = sintomasDisponiveis[indice];
-
-                            boolean jaExiste = false;
-                            for(int i = 0; i < qtdSelecionados; i++) {
-                                if(sintomasEscolhidos[i].getNomeSintoma().equalsIgnoreCase(sintomaSelecionado.getNomeSintoma())){
-                                    jaExiste = true;
-                                    break;
-                                }
+                            sintomaEncontrado = sintomasDisponiveis[indice];
+                        }
+                    } catch (NumberFormatException e) {
+                        for (Sintomas s : sintomasDisponiveis) {
+                            if (s != null && s.getNomeSintoma().equalsIgnoreCase(parte)) {
+                                sintomaEncontrado = s;
+                                break;
                             }
+                        }
+                    }
 
-                            if (!jaExiste) {
-                                sintomasEscolhidos[qtdSelecionados] = sintomaSelecionado;
-                                qtdSelecionados++;
-                                System.out.println("Adicionado: " + sintomaSelecionado.getNomeSintoma());
-                            } else {
-                                System.out.println(YELLOW + "Sintoma já selecionado: " + sintomaSelecionado.getNomeSintoma() + RESET);
+                    if (sintomaEncontrado != null) {
+                        boolean jaExiste = false;
+                        for(int i = 0; i < qtdSelecionados; i++) {
+                            if(sintomasEscolhidos[i].getNomeSintoma().equalsIgnoreCase(sintomaEncontrado.getNomeSintoma())){
+                                jaExiste = true; break;
                             }
-
-                        } else {
-                            System.out.println(RED + "Opção inválida: " + parte + RESET);
                         }
 
-                    } catch (NumberFormatException e) {
-                        //colocar log
+                        if (!jaExiste) {
+                            sintomasEscolhidos[qtdSelecionados++] = sintomaEncontrado;
+                            System.out.println(GREEN + "Adicionado: " + sintomaEncontrado.getNomeSintoma() + RESET);
+                        } else {
+                            System.out.println(YELLOW + "Já selecionado: " + sintomaEncontrado.getNomeSintoma() + RESET);
+                        }
+                    } else {
+                        if(!parte.equals("0")) System.out.println(RED + "Não encontrado: " + parte + RESET);
                     }
                 }
 
                 if (qtdSelecionados > 0) {
-                    System.out.println("\nDeseja finalizar a seleção? (digite 'sair' para terminar ou ENTER para adicionar mais)");
-                    if(ler.nextLine().equalsIgnoreCase("sair")) break;
+                    System.out.println("\n[ENTER] para adicionar mais ou digite 'sair' para terminar a triagem.");
                 }
 
             } while (true);
 
             if (qtdSelecionados > 0) {
 
-                NivelSintomas nivelSintomaEscolhido = NivelSintomas.VERDE;
+                NivelSintomas nivelFinal = NivelSintomas.VERDE;
                 for(int i=0; i<qtdSelecionados; i++) {
-                    NivelSintomas nivel = sintomasEscolhidos[i].getNivelSintoma();
-                    if(nivel == NivelSintomas.VERMELHO) {
-                        nivelSintomaEscolhido = NivelSintomas.VERMELHO;
-                        break;
-                    }
-                    if(nivel == NivelSintomas.LARANJA) nivelSintomaEscolhido = NivelSintomas.LARANJA;
+                    NivelSintomas n = sintomasEscolhidos[i].getNivelSintoma();
+                    if(n == NivelSintomas.VERMELHA) { nivelFinal = NivelSintomas.VERMELHA; break; }
+                    if(n == NivelSintomas.LARANJA) nivelFinal = NivelSintomas.LARANJA;
                 }
 
                 String especialidadeCalculada = calcularEspecialidadeAutomaticamente(sintomasEscolhidos, qtdSelecionados);
-
                 if (especialidadeCalculada == null) {
                     System.out.println(YELLOW + "\nSistema incerto. Sugestão: 'CLINICA GERAL'." + RESET);
                     especialidadeCalculada = "GERAL";
@@ -308,8 +328,7 @@ public class Main {
                     System.out.println(CYAN_BOLD + "\nDiagnóstico do Sistema: Encaminhar para " + especialidadeCalculada + RESET);
                 }
 
-                Utente novoUtente = new Utente(nome, sintomasEscolhidos, nivelSintomaEscolhido, hora, especialidadeCalculada);
-
+                Utente novoUtente = new Utente(nome, sintomasEscolhidos, nivelFinal, hora, especialidadeCalculada);
                 ficheiroUtentes.adicionaUtente(novoUtente);
 
                 System.out.println(GREEN + "Triagem concluída! Utente na sala de espera." + RESET);
@@ -321,7 +340,8 @@ public class Main {
             }
 
         } catch (Exception e) {
-            System.out.println(RED + "Erro inesperado na triagem: " + e.getMessage() + RESET);
+            System.out.println(RED + "Erro inesperado: " + e.getMessage() + RESET);
+            e.printStackTrace();
         }
         pressionarEnter(ler);
     }
@@ -911,7 +931,7 @@ public class Main {
             for (Sintomas sintomas : lista) {
                 if (sintomas != null) {
                     String corTexto = RESET;
-                    if (sintomas.getNivelSintoma() == NivelSintomas.VERMELHO) corTexto = RED;
+                    if (sintomas.getNivelSintoma() == NivelSintomas.VERMELHA) corTexto = RED;
                     else if (sintomas.getNivelSintoma() == NivelSintomas.LARANJA) corTexto = YELLOW;
                     else if (sintomas.getNivelSintoma() == NivelSintomas.VERDE) corTexto = GREEN;
 
@@ -1148,7 +1168,7 @@ public class Main {
                 naFila++;
 
                 String corUrgencia = RESET;
-                if (u.getNivelSintoma() == NivelSintomas.VERMELHO) corUrgencia = RED;
+                if (u.getNivelSintoma() == NivelSintomas.VERMELHA) corUrgencia = RED;
                 else if (u.getNivelSintoma() == NivelSintomas.LARANJA) corUrgencia = YELLOW;
                 else if (u.getNivelSintoma() == NivelSintomas.VERDE) corUrgencia = GREEN;
 
@@ -1180,8 +1200,8 @@ public class Main {
         for (int i = 0; i < qtd; i++) {
             NivelSintomas nivelAtual = sintomasEscolhidos[i].getNivelSintoma();
 
-            if (nivelAtual == NivelSintomas.VERMELHO) {
-                urgenciaMaxima = NivelSintomas.VERMELHO;
+            if (nivelAtual == NivelSintomas.VERMELHA) {
+                urgenciaMaxima = NivelSintomas.VERMELHA;
                 break;
             }
             if (nivelAtual == NivelSintomas.LARANJA && urgenciaMaxima == NivelSintomas.VERDE) {
@@ -1196,10 +1216,10 @@ public class Main {
         for (int i = 0; i < qtd; i++) {
             if (sintomasEscolhidos[i].getNivelSintoma() == urgenciaMaxima) {
 
-                Especialidades espEnum = sintomasEscolhidos[i].getEspecialidadesAssociadas();
-                if (espEnum == null) continue;
+                Especialidades especialidadeEnum = sintomasEscolhidos[i].getEspecialidadesAssociadas();
+                if (especialidadeEnum == null) continue;
 
-                String sigla = espEnum.getCodigo();
+                String sigla = especialidadeEnum.getCodigo();
 
                 boolean encontrado = false;
                 for (int k = 0; k < totalSiglas; k++) {
@@ -1271,12 +1291,12 @@ public class Main {
                 }
 
             else if (nivel == NivelSintomas.LARANJA && espera >= TEMPO_AGRAVAMENTO_LARANJA) {
-                    utente.setNivelSintoma(NivelSintomas.VERMELHO);
+                    utente.setNivelSintoma(NivelSintomas.VERMELHA);
                     utente.resetarTempoEspera();
                     notificacoes += " !!! PERIGO: Utente " + utente.getNomeUtente() + " agravou para VERMELHO.\n";
                 }
 
-            else if (nivel == NivelSintomas.VERMELHO && espera >= TEMPO_SAIDA_VERMELHO) {
+            else if (nivel == NivelSintomas.VERMELHA && espera >= TEMPO_SAIDA_VERMELHO) {
                     notificacoes += " X UTENTE PERDIDO: " + utente.getNomeUtente() + " abandonou/transferido por falta de atendimento.\n";
 
                     if (ficheiroUtentes.removerUtente(utente)) {

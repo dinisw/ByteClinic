@@ -34,10 +34,10 @@ public class FicheiroEspecialidade {
     //endregion
 
     //region CARREGAR FICHEIRO
-    public void carregarFicheiro(String especialidade){
-        File ficheiro = new File("especialidade.txt");
+    public void carregarFicheiro(String caminho, String separador){
+        File ficheiro = new File(caminho);
         if(!ficheiro.exists()) {
-            System.out.println("O ficheiro" + especialidade + "não existe!");
+            System.out.println("O ficheiro " + caminho + " não existe!");
             return;
         }
         try {
@@ -46,7 +46,7 @@ public class FicheiroEspecialidade {
                 String linha = ler.nextLine();
                 if(linha.trim().isEmpty())
                     continue;
-                String[] dados = linha.split(";");
+                String[] dados = linha.split(separador);
                 if(dados.length >= 2){
                     Especialidade especialidade2 = new Especialidade(dados[0], dados[1]);
                     adicionarEspecialidade(especialidade2);

@@ -29,35 +29,57 @@ public class FicheirosSintomas {
         this.listaSintomas = expandido;
     }
 
-    public void carregarSintomas() {
-        File ficheiro = new File("sintomas.txt");
-        if(!ficheiro.exists()) {
-            System.out.println("Erro ao carregar sintomas");
+    public void carregarSintomas(String caminho, String separador) {
+        File ficheiro = new File(caminho);
+        if (!ficheiro.exists()) {
+            System.out.println("Erro: Ficheiro " + caminho + " não encontrado.");
             return;
         }
+
         try {
             Scanner ler = new Scanner(ficheiro);
-            while(ler.hasNext()) {
+            while (ler.hasNextLine()) {
                 String linha = ler.nextLine();
-                if(linha.trim().isEmpty()) continue;
-                String[] dados = linha.split(";");
-                if(dados.length >= 2) {
-                    String nome = dados[0];
-                    String cor = dados[1];
+                if (linha.trim().isEmpty()) continue;
 
-                    int qtdEspecialidades = dados.length - 2;
-                    String[] especialidades =  new String[qtdEspecialidades];
-                    for(int i = 0; i < qtdEspecialidades; i++) {
-                        especialidades[i] = dados[i+2].trim();
+                String[] dados = linha.split(separador);
+
+                if (dados.length >= 2) {
+                    String nomeDoSintoma = dados[0].trim();
+
+                    String textoNivel = dados[1].trim().toUpperCase();
+
+                    NivelSintomas nivel;
+
+                    try {
+                        nivel = NivelSintomas.valueOf(textoNivel);
+                    } catch (IllegalArgumentException e) {
+                        System.out.println("Aviso: Nível '" + textoNivel + "' inválido para " + nomeDoSintoma + ". Será definido como VERDE.");
+                        nivel = NivelSintomas.VERDE;
                     }
 
-                    Sintomas sintoma = new Sintomas(nome, cor, especialidades);
+                    Especialidades especialidadeEncontrada = null;
+
+                    if (dados.length > 2) {
+                        String codigoLido = dados[2].trim();
+
+                        for (Especialidades especialidade : Especialidades.values()) {
+                            if (especialidade.getCodigo().equalsIgnoreCase(codigoLido)) {
+                                especialidadeEncontrada = especialidade;
+                                break;
+                            }
+                        }
+                    }
+
+                    Sintomas sintoma = new Sintomas(nomeDoSintoma, nivel, especialidadeEncontrada);
                     adicionarSintoma(sintoma);
                 }
             }
             ler.close();
+            System.out.println("Sintomas carregados: " + totalSintomas);
+
         } catch (FileNotFoundException e) {
-            System.out.println("Erro ao carregar sintomas" + e.getMessage());
+            System.out.println("Erro crítico ao ler ficheiro: " + e.getMessage());
         }
     }
 

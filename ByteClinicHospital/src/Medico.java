@@ -48,7 +48,7 @@ public class Medico {
         switch (utente.getNivelSintoma()) {
             case VERDE: this.tempoRestanteConsulta = 1; break;
             case LARANJA: this.tempoRestanteConsulta = 2; break;
-            case VERMELHO: this.tempoRestanteConsulta = 3; break;
+            case VERMELHA: this.tempoRestanteConsulta = 3; break;
         }
     }
 
