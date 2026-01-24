@@ -86,7 +86,7 @@ public class Main {
 
                     ficheirosSintomas.guardarSintomas();
                     ficheiroEspecialidade.guardarFicheiro(ARQUIVO_ESPECIALIDADES);
-                    ficheiroMedicos.guardarTodosMedicos(ARQUIVO_MEDICOS);
+                    ficheiroMedicos.guardarFicheiroMedico(ARQUIVO_MEDICOS);
                     ficheiroUtentes.guardarFicheiro(SEPARADOR);
 
                     System.out.println(GREEN + "Dados salvos. Até logo!" + RESET);
@@ -462,11 +462,10 @@ public class Main {
             int horaSaida = Integer.parseInt(ler.nextLine());
             System.out.println("Salário Hora: ");
             int salario = Integer.parseInt(ler.nextLine());
-            ler.nextLine();
-
             Medico medicos = new Medico(nome, cedula, especialidadeSelecionada, horaEntrada, horaSaida, salario);
 
             ficheiroMedicos.adicionarMedico(medicos);
+            ficheiroMedicos.guardarFicheiroMedico(ARQUIVO_MEDICOS);
 
             System.out.println(GREEN + "Médico registado com sucesso!" + RESET);
         } catch (NumberFormatException e) {
@@ -1254,7 +1253,7 @@ public class Main {
 
     private static void avancarUmaHora(Scanner ler) {
 
-        if (hora == 23) {
+        if (hora == 24) {
             hora = 0;
             dia++;
             System.out.println(YELLOW + ">>> UM NOVO DIA COMEÇOU (Dia " + dia + ") <<<" + RESET);

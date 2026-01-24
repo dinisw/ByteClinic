@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.Formatter;
+import java.util.Locale;
 import java.util.Scanner;
 
 public class FicheiroMedicos {
@@ -46,7 +47,7 @@ public class FicheiroMedicos {
 
                     int horaEntrada = Integer.parseInt(dados[3]);
                     int horaSaida = Integer.parseInt(dados[4]);
-                    int salarioHora = Integer.parseInt(dados[5]);
+                    int salarioHora = Integer.parseInt(dados[5].replace(",", "."));
 
                     Medico medico = new Medico(nomeMedico, cedula, especialidade, horaEntrada, horaSaida, salarioHora);
                     adicionarMedico(medico);
@@ -63,47 +64,25 @@ public class FicheiroMedicos {
     //endregion
 
     //region GUARDAR FICHEIRO
-    public void guardarFicheiroMedico(Medico medico, String caminho) {
+    public void guardarFicheiroMedico(String caminho) {
         try {
-            FileWriter ficheiro = new FileWriter(caminho, true);
-            PrintWriter writer = new PrintWriter(ficheiro);
-
-            File f = new File("medicos.txt");
-            if (f.length() > 0) {}
-            writer.printf("%s;%d;%s;%d;%d;%.2f%n",
-                    medico.getNomeMedico(),
-                    medico.getCedulaProfissional(),
-                    medico.getEspecialidade(),
-                    medico.getHoraEntrada(),
-                    medico.getHoraSaida(),
-                    medico.getSalarioHora());
-            writer.close();
-            System.out.println("Ficheiro guardado com sucesso.");
-        } catch (IOException ex) {
-            System.out.println("Erro ao guardar ficheiro" + ex.getMessage());
-        }
-    }
-
-    public void guardarTodosMedicos(String caminho) {
-        try {
-            PrintWriter writer = new PrintWriter(new FileWriter(caminho, false));
-
+            PrintWriter writer = new PrintWriter(caminho);
             for (int i = 0; i < totalMedicos; i++) {
                 Medico m = listaMedicos[i];
                 if (m != null) {
-                    writer.printf("%s;%d;%s;%d;%d;%.2f%n",
+                    writer.printf(Locale.US, "%s;%d;%s;%d;%d;%.2f%n",
                             m.getNomeMedico(),
                             m.getCedulaProfissional(),
-                            m.getEspecialidade().getNome(),
+                            m.getEspecialidade().getCodigo(),
                             m.getHoraEntrada(),
                             m.getHoraSaida(),
                             m.getSalarioHora());
                 }
             }
             writer.close();
-            System.out.println("Base de dados de médicos atualizada com sucesso.");
-        } catch (IOException e) {
-            System.out.println("Erro grave ao guardar médicos: " + e.getMessage());
+            System.out.println("Ficheiro guardado com sucesso.");
+        } catch (IOException ex) {
+            System.out.println("Erro ao guardar ficheiro" + ex.getMessage());
         }
     }
     //endregion
@@ -196,6 +175,7 @@ public class FicheiroMedicos {
             medico.setHoraEntrada(novaHoraEntrada);
             medico.setHoraSaida(novaHoraSaida);
             medico.setSalarioHora(novoSalarioHora);
+            guardarFicheiroMedico("medicos.txt");
             return true;
         }
         return false;
