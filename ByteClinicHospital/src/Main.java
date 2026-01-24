@@ -1209,9 +1209,9 @@ public class Main {
             }
         }
 
-        String[] sintomasEncontrados = new String[qtd];
+        String[] nomesEncontrados = new String[qtd];
         int[] contadores = new int[qtd];
-        int totalSiglas = 0;
+        int totalNomes = 0;
 
         for (int i = 0; i < qtd; i++) {
             if (sintomasEscolhidos[i].getNivelSintoma() == urgenciaMaxima) {
@@ -1219,11 +1219,12 @@ public class Main {
                 Especialidades especialidadeEnum = sintomasEscolhidos[i].getEspecialidadesAssociadas();
                 if (especialidadeEnum == null) continue;
 
-                String sigla = especialidadeEnum.getCodigo();
+                String nomeEspecialidade = especialidadeEnum.name();
+
 
                 boolean encontrado = false;
-                for (int k = 0; k < totalSiglas; k++) {
-                    if (sintomasEncontrados[k].equals(sigla)) {
+                for (int k = 0; k < totalNomes; k++) {
+                    if (nomesEncontrados[k].equals(nomeEspecialidade)) {
                         contadores[k]++;
                         encontrado = true;
                         break;
@@ -1231,9 +1232,9 @@ public class Main {
                 }
 
                 if (!encontrado) {
-                    sintomasEncontrados[totalSiglas] = sigla;
-                    contadores[totalSiglas] = 1;
-                    totalSiglas++;
+                    nomesEncontrados[totalNomes] = nomeEspecialidade;
+                    contadores[totalNomes] = 1;
+                    totalNomes++;
                 }
             }
         }
@@ -1241,10 +1242,10 @@ public class Main {
         String maiorQtdDeSintomasIguais = null;
         int maiorContagem = -1;
 
-        for (int i = 0; i < totalSiglas; i++) {
+        for (int i = 0; i < totalNomes; i++) {
             if (contadores[i] > maiorContagem) {
                 maiorContagem = contadores[i];
-                maiorQtdDeSintomasIguais = sintomasEncontrados[i];
+                maiorQtdDeSintomasIguais = nomesEncontrados[i];
             }
         }
 
