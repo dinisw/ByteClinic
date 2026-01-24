@@ -81,7 +81,6 @@ public class Utente {
 
     public void setEmAtendimento(boolean emAtendimento) {
         this.emAtendimento = emAtendimento;
-        // Se entrou em atendimento, reseta espera
         if(emAtendimento) this.tempoDeEsperaAtual = 0;
     }
 
@@ -94,7 +93,6 @@ public class Utente {
     }
 
     public String paraFicheiro(String separador) {
-
         StringBuilder sbSintomas = new StringBuilder();
         if (getSintomas() != null) {
             for (int i = 0; i < getSintomas().length; i++) {

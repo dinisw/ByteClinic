@@ -42,9 +42,8 @@ public class Medico {
     public void iniciarAtendimento(Utente utente) {
         this.ocupado = true;
         this.utenteAtual = utente;
-        this.horasConsecutivasTrabalhadas++; // Começa a contar horas
+        this.horasConsecutivasTrabalhadas++;
 
-        // Define tempo de consulta baseado na urgência [cite: 44-47]
         switch (utente.getNivelSintoma()) {
             case VERDE: this.tempoRestanteConsulta = 1; break;
             case LARANJA: this.tempoRestanteConsulta = 2; break;
@@ -74,7 +73,6 @@ public class Medico {
                 status = " -> Dr. " + nomeMedico + " terminou consulta com " + utenteAtual.getNomeUtente() + ".\n";
                 utenteAtual = null;
 
-                // Verificar regra de descanso: 1h descanso a cada 5h trabalhadas
                 if (horasConsecutivasTrabalhadas >= 5) {
                     tempoAteFimDescanso = 1;
                     status += " -> Dr. " + nomeMedico + " entrou em pausa forçada (Cansaço).\n";
@@ -93,11 +91,6 @@ public class Medico {
     public boolean isEmDescanso() {
         return tempoAteFimDescanso > 0;
     }
-
-
-
-
-
 
     public String getNomeMedico() {
         return nomeMedico;
@@ -161,8 +154,15 @@ public class Medico {
 
     @Override
     public String toString() {
-        String estado = ocupado ? "OCUPADO" : "LIVRE";
+        String estadoStr;
+        if (isOcupado()) {
+            estadoStr = "OCUPADO";
+        } else if (Main.getHora() >= getHoraEntrada() && Main.getHora() < getHoraSaida()) {
+            estadoStr = "LIVRE";
+        } else {
+            estadoStr = "AUSENTE";
+        }
         return String.format("Dr(a). %s [Cédula: %d] | %s | %dh-%dh | Status: %s",
-                nomeMedico, cedulaProfissional, especialidade, horaEntrada, horaSaida, estado);
+                nomeMedico, cedulaProfissional, especialidade, horaEntrada, horaSaida, estadoStr);
     }
 }

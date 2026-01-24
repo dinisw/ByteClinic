@@ -83,12 +83,11 @@ public class FicheirosSintomas {
         }
     }
 
-    public void guardarSintomas() {
+    public void guardarSintomas(String caminho, String separador) {
         try {
-            Formatter out = new Formatter(new FileWriter("sintomas.txt"));
+            Formatter out = new Formatter(new FileWriter(caminho));
             for(int i = 0; i < totalSintomas; i++) {
-                Sintomas sintoma = listaSintomas[i];
-                out.format("%s%n", listaSintomas[i].paraFicheiro());
+                out.format("%s%n", listaSintomas[i].paraFicheiro(separador));
             }
         } catch (IOException e) {
             System.out.println("Erro ao carregar sintomas" + e.getMessage());        }

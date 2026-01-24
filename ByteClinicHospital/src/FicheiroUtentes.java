@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.Scanner;
 
 public class FicheiroUtentes {
-    private String CAMINHO_FICHEIRO = "utentes.txt";
     private Utente[] paciente;
     private int totalPacientes;
 
@@ -44,9 +43,9 @@ public class FicheiroUtentes {
         return true;
     }
 
-    public void guardarFicheiro(String separador) {
+    public void guardarFicheiro(String caminho, String separador) {
         try {
-            PrintWriter escritor = new PrintWriter(new FileWriter(CAMINHO_FICHEIRO, false));
+            PrintWriter escritor = new PrintWriter(new FileWriter(caminho, false));
 
             for (int i = 0; i < totalPacientes; i++) {
                 if (paciente[i] != null) {
@@ -60,8 +59,8 @@ public class FicheiroUtentes {
         }
     }
 
-    public void carregarFicheiro(FicheiroMedicos ficheiroMedicos, FicheirosSintomas ficheirosSintomas, String separador) {
-        File ficheiro = new File(CAMINHO_FICHEIRO);
+    public void carregarFicheiro(FicheiroMedicos ficheiroMedicos, FicheirosSintomas ficheirosSintomas, String caminho, String separador) {
+        File ficheiro = new File(caminho);
         if (!ficheiro.exists()) return;
 
         try {

@@ -64,18 +64,23 @@ public class FicheiroMedicos {
     //endregion
 
     //region GUARDAR FICHEIRO
-    public void guardarFicheiroMedico(String caminho) {
+    public void guardarFicheiroMedico(String caminho, String separador) {
         try {
             PrintWriter writer = new PrintWriter(caminho);
             for (int i = 0; i < totalMedicos; i++) {
                 Medico m = listaMedicos[i];
                 if (m != null) {
-                    writer.printf(Locale.US, "%s;%d;%s;%d;%d;%.2f%n",
+                    writer.printf(Locale.US, "%s%s%d%s%s%s%d%s%d%s%.2f%n",
                             m.getNomeMedico(),
+                            separador,
                             m.getCedulaProfissional(),
+                            separador,
                             m.getEspecialidade().getCodigo(),
+                            separador,
                             m.getHoraEntrada(),
+                            separador,
                             m.getHoraSaida(),
+                            separador,
                             m.getSalarioHora());
                 }
             }
@@ -167,7 +172,7 @@ public class FicheiroMedicos {
     //endregion
 
     //region ATUALIZAR MEDICO
-    public boolean atualizarMedico(int cedula, String novoNomeMedico, Especialidades novaEspecialidade, int novaHoraEntrada, int novaHoraSaida, int novoSalarioHora) {
+    public boolean atualizarMedico(int cedula, String novoNomeMedico, Especialidades novaEspecialidade, int novaHoraEntrada, int novaHoraSaida, int novoSalarioHora, String caminho, String separador) {
         Medico medico = procurarMedicoPorCedula(cedula);
         if (medico != null) {
             medico.setNomeMedico(novoNomeMedico);
@@ -175,7 +180,7 @@ public class FicheiroMedicos {
             medico.setHoraEntrada(novaHoraEntrada);
             medico.setHoraSaida(novaHoraSaida);
             medico.setSalarioHora(novoSalarioHora);
-            guardarFicheiroMedico("medicos.txt");
+            guardarFicheiroMedico(caminho, separador);
             return true;
         }
         return false;

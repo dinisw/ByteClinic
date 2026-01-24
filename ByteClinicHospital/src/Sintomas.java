@@ -42,16 +42,16 @@ public class Sintomas {
     @Override
     public String toString() {
         return "Sintomas{" +
-                "nomeSintoma='" + nomeSintoma + '\'' +
-                ", cor='" + nivelSintomas + '\'' +
-                ", especialidadesAssociadas='" + especialidadesAssociadas + '\'' +
+                "nomeSintoma: '" + nomeSintoma + '\'' +
+                ", cor: '" + nivelSintomas + '\'' +
+                ", especialidadesAssociadas: '" + especialidadesAssociadas + '\'' +
                 '}';
     }
 
-    public String paraFicheiro() {
-        String linha = nomeSintoma + ";" + nivelSintomas.name();
+    public String paraFicheiro(String separador) {
+        String linha = nomeSintoma + separador + nivelSintomas.name();
         if (especialidadesAssociadas != null) {
-            linha += ";" + especialidadesAssociadas.getCodigo();
+            linha += separador + especialidadesAssociadas.getCodigo();
         } else {
             linha += ";NA";
         }

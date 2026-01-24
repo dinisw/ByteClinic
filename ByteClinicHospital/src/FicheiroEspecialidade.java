@@ -60,12 +60,12 @@ public class FicheiroEspecialidade {
     //endregion
 
     //region GUARDAR FICHEIRO
-    public void guardarFicheiro(String especialidade) {
+    public void guardarFicheiro(String separador, String caminho) {
         try {
-            Formatter formatter = new Formatter(new FileWriter(especialidade));
+            Formatter formatter = new Formatter(new FileWriter(caminho));
             for (int i = 0; i < totalEspecialidade; i++) {
                 Especialidade especialidade1 = listaEspecialidade[i];
-                formatter.format("%s;%s%n", especialidade1.getSigla(), especialidade1.getNome());
+                formatter.format("%s%s%s", especialidade1.getSigla(), separador, especialidade1.getNome());
             }
             System.out.println("Ficheiro guardado com sucesso.");
         } catch (IOException e) {
