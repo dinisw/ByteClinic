@@ -45,8 +45,7 @@ public class FicheiroEspecialidade {
             Scanner ler = new Scanner(ficheiro);
             while (ler.hasNextLine()) {
                 String linha = ler.nextLine();
-                if(linha.trim().isEmpty())
-                    continue;
+                if(linha.trim().isEmpty()) continue;
                 String[] dados = linha.split(separador);
                 if(dados.length >= 2){
                     Especialidade especialidade2 = new Especialidade(dados[0], dados[1]);
@@ -61,12 +60,13 @@ public class FicheiroEspecialidade {
     //endregion
 
     //region GUARDAR FICHEIRO
-    public void guardarFicheiro(String separador, String caminho) {
+    public void guardarFicheiro(String caminho, String separador) {
         try {
-            PrintWriter writer = new PrintWriter(new PrintWriter(caminho));
+            PrintWriter out = new PrintWriter (caminho);
             for (int i = 0; i < totalEspecialidade; i++) {
-                writer.println(listaEspecialidade[i].getSigla() + separador + listaEspecialidade[i].getNome());
+                out.println(listaEspecialidade[i].getSigla() + separador + listaEspecialidade[i].getNome());
             }
+            out.close();
             System.out.println("Ficheiro guardado com sucesso.");
         } catch (IOException e) {
             System.out.println("Erro ao guardar ficheiro" + e.getMessage());
@@ -104,7 +104,7 @@ public class FicheiroEspecialidade {
     //region PROCURAR ESPECIALIDADE
     public Especialidade procurarEspecialidade(String sigla) {
         for(int i = 0; i < totalEspecialidade; i++) {
-            if(listaEspecialidade[i].getSigla().equalsIgnoreCase(sigla)) {
+            if(listaEspecialidade[i].getSigla().equals(sigla)) {
                 return listaEspecialidade[i];
             }
         }

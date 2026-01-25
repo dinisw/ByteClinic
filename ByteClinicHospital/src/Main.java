@@ -1,5 +1,6 @@
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Formatter;
 import java.util.Scanner;
 
 public class Main {
@@ -757,8 +758,7 @@ public class Main {
             String nome = ler.nextLine();
             Especialidade especialidade = new Especialidade(sigla, nome);
             ficheiroEspecialidade.adicionarEspecialidade(especialidade);
-
-            ficheiroEspecialidade.guardarFicheiro(ARQUIVO_ESPECIALIDADES, SEPARADOR);
+            ficheiroEspecialidade.guardarFicheiro("especialidades.txt", SEPARADOR);
             System.out.println(GREEN + "Especialidade registada com sucesso!" + RESET);
         }
         pressionarEnter(ler);
@@ -791,7 +791,7 @@ public class Main {
         Especialidade especialidade = ficheiroEspecialidade.procurarEspecialidade(sigla);
 
         if (especialidade != null) {
-            System.out.println(GREEN + "\nEncontrado: " + RESET);
+            System.out.println(GREEN + "\nEncontrado: " + especialidade + RESET);
         } else {
             System.out.println(RED + "Não encontrada." + RESET);
         }
