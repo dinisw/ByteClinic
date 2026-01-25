@@ -3,6 +3,7 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Formatter;
+import java.io.PrintWriter;
 import java.util.Scanner;
 
 public class FicheirosSintomas {
@@ -85,12 +86,20 @@ public class FicheirosSintomas {
 
     public void guardarSintomas(String caminho, String separador) {
         try {
-            Formatter out = new Formatter(new FileWriter(caminho));
+            PrintWriter writer = new PrintWriter(new FileWriter(caminho, false)); // false = sobrescrever
             for(int i = 0; i < totalSintomas; i++) {
-                out.format("%s%n", listaSintomas[i].paraFicheiro(separador));
+                if (listaSintomas[i] != null) {
+                String codigoEsp = (listaSintomas[i].getEspecialidadesAssociadas() != null) ? listaSintomas[i].getEspecialidadesAssociadas().getCodigo() : "NA";
+
+                writer.println(listaSintomas[i].getNomeSintoma() + separador + listaSintomas[i].getNivelSintoma().name() + separador + codigoEsp);
+                }
             }
+
+            writer.close();
+            System.out.println("Sintomas guardados com sucesso.");
         } catch (IOException e) {
-            System.out.println("Erro ao carregar sintomas" + e.getMessage());        }
+            System.out.println("Erro ao carregar sintomas" + e.getMessage());
+        }
     }
 
     public boolean removerSintoma(String sintoma) {
@@ -101,7 +110,7 @@ public class FicheirosSintomas {
                 break;
             }
         }
-        for ( int i = 0; i < totalSintomas - 1; i++) { //Volta para a esquerda para não haver espaços vazios.
+        for ( int i = contador; i < totalSintomas - 1; i++) { //Volta para a esquerda para não haver espaços vazios.
             listaSintomas[i] = listaSintomas[i + 1];
         }
         listaSintomas[totalSintomas - 1] = null;
@@ -120,12 +129,4 @@ public class FicheirosSintomas {
         return null;
     }
 
-    public boolean atualuzarSintoma(String nomeSintoma, NivelSintomas nivelSintomas) {
-        Sintomas sintomas = procurarSintoma(nomeSintoma);
-        if(sintomas != null) {
-            sintomas.setNivelSintoma(nivelSintomas);
-            return true;
-        }
-        return false;
-    }
 }

@@ -29,14 +29,19 @@ public class Main {
     }
     //endregion
 
+    //region Histórico para utentes
+    private static int[] historicoContagemEspecialidades = new int[Especialidades.values().length];
+    private static int totalUtentesHistorico = 0;
+    //endregion
+
     //region Variáveis de Configuração
     public static int TEMPO_CONSULTA_VERDE = 1;
     public static int TEMPO_CONSULTA_LARANJA = 2;
-    public static int TEMPO_CONSULTA_VERMELHO = 3;
+    public static int TEMPO_CONSULTA_VERMELHA = 3;
 
     public static int TEMPO_AGRAVAMENTO_VERDE = 3;
     public static int TEMPO_AGRAVAMENTO_LARANJA = 3;
-    public static int TEMPO_SAIDA_VERMELHO = 2;
+    public static int TEMPO_SAIDA_VERMELHA = 2;
     //endregion
 
     //region Design
@@ -58,7 +63,7 @@ public class Main {
     //endregion
 
     //region MAIN
-    static void main(String[] args) {
+    public static void main(String[] args) {
 
         System.out.println("A carregar dados do sistema...");
 
@@ -337,26 +342,30 @@ public class Main {
                     if(n == NivelSintomas.VERMELHA) { nivelFinal = NivelSintomas.VERMELHA; break; }
                     if(n == NivelSintomas.LARANJA) nivelFinal = NivelSintomas.LARANJA;
                 }
+                Especialidades especialidadesCalculado = calcularEspecialidadeAutomaticamente(sintomasEscolhidos, qtdSelecionados);
 
-                String especialidadeCalculada = calcularEspecialidadeAutomaticamente(sintomasEscolhidos, qtdSelecionados);
-                if (especialidadeCalculada == null) {
-                    System.out.println(YELLOW + "\nSistema incerto. Sugestão: 'CLINICA GERAL'." + RESET);
-                    especialidadeCalculada = "GERAL";
-                } else {
-                    System.out.println(CYAN_BOLD + "\nDiagnóstico do Sistema: Encaminhar para " + especialidadeCalculada + RESET);
-                }
+                String nomeEspecialidade = (especialidadesCalculado != null) ? especialidadesCalculado.getNome() : "Geral";
+                System.out.println(CYAN_BOLD + "\nDiagnóstico: Encaminhar para " + nomeEspecialidade + RESET);
 
-                Utente novoUtente = new Utente(nome, sintomasEscolhidos, nivelFinal, hora, especialidadeCalculada);
+                Utente novoUtente = new Utente(nome, sintomasEscolhidos, nivelFinal, hora, especialidadesCalculado);
                 ficheiroUtentes.adicionaUtente(novoUtente);
 
-                System.out.println(GREEN + "Triagem concluída! Utente na sala de espera." + RESET);
+                if (especialidadesCalculado != null) {
+                    Especialidades[] todasAsEspecialidades = Especialidades.values();
+                    for(int i = 0; i < todasAsEspecialidades.length; i++) {
+                        if(todasAsEspecialidades[i] == especialidadesCalculado) {
+                            historicoContagemEspecialidades[i]++;
+                            totalUtentesHistorico++;
+                            break;
+                        }
+                    }
+                }
 
-                atribuirPacientesAutomaticamente();
-
+                System.out.println(GREEN + "Triagem concluída! Utente registado na sala de espera." + RESET);
+                System.out.println(YELLOW + "Nota: O atendimento iniciará na próxima mudança de hora." + RESET);
             } else {
                 System.out.println(RED + "Nenhum sintoma selecionado. Triagem cancelada." + RESET);
             }
-
         } catch (Exception e) {
             System.out.println(RED + "Erro inesperado: " + e.getMessage() + RESET);
         }
@@ -480,7 +489,7 @@ public class Main {
             System.out.print("Hora Saída (0-23): ");
             int horaSaida = Integer.parseInt(ler.nextLine());
             System.out.println("Salário Hora: ");
-            int salario = Integer.parseInt(ler.nextLine());
+            Double salario = Double.parseDouble(ler.nextLine());
             Medico medicos = new Medico(nome, cedula, especialidadeSelecionada, horaEntrada, horaSaida, salario);
 
             ficheiroMedicos.adicionarMedico(medicos);
@@ -594,7 +603,7 @@ public class Main {
             int saida = Integer.parseInt(ler.nextLine());
 
             System.out.print("Novo Salário: ");
-            int salario = Integer.parseInt(ler.nextLine());
+            Double salario = Double.parseDouble(ler.nextLine());
 
             boolean sucesso = ficheiroMedicos.atualizarMedico(cedula, nome, especialidadeSelecionada, entrada, saida, salario, ARQUIVO_MEDICOS, SEPARADOR);
 
@@ -747,6 +756,8 @@ public class Main {
             String nome = ler.nextLine();
             Especialidade especialidade = new Especialidade(sigla, nome);
             ficheiroEspecialidade.adicionarEspecialidade(especialidade);
+
+            ficheiroEspecialidade.guardarFicheiro(ARQUIVO_ESPECIALIDADES, SEPARADOR);
             System.out.println(GREEN + "Especialidade registada com sucesso!" + RESET);
         }
         pressionarEnter(ler);
@@ -792,12 +803,14 @@ public class Main {
         System.out.print("Sigla da especialidade a editar: ");
         String sigla = ler.nextLine();
 
-        if (ficheiroEspecialidade.existeEspecialidade(sigla)) {
+        if (!ficheiroEspecialidade.existeEspecialidade(sigla)) {
             System.out.println(RED + "Especialidade não Existe." + RESET);
         } else {
             System.out.print("Novo Nome: ");
             String novoNome = ler.nextLine();
             ficheiroEspecialidade.atualizarEspecialidade(sigla, novoNome);
+
+            ficheiroEspecialidade.guardarFicheiro(ARQUIVO_ESPECIALIDADES, SEPARADOR);
             System.out.println(GREEN + "Atualizado com sucesso!" + RESET);
         }
         pressionarEnter(ler);
@@ -809,6 +822,7 @@ public class Main {
         System.out.print("Sigla da especialidade a remover: ");
         String sigla = ler.nextLine();
         if (ficheiroEspecialidade.removerEspecialidade(sigla)) {
+            ficheiroEspecialidade.guardarFicheiro(ARQUIVO_ESPECIALIDADES, SEPARADOR);
             System.out.println(GREEN + "Removido com sucesso." + RESET);
         } else {
             System.out.println(RED + "Não encontrado." + RESET);
@@ -1069,31 +1083,23 @@ public class Main {
 
         System.out.println("\n" + WHITE_BOLD + "4. Top 3 Especialidades (%)" + RESET);
 
-        Especialidade[] especialidades = ficheiroEspecialidade.getLista();
-        int qtdEspec = ficheiroEspecialidade.getTotal();
+        Especialidades[] especialidades = Especialidades.values();
+        int qtdEspec = especialidades.length;
 
         String[] nomesEsp = new String[qtdEspec];
         int[] contagens = new int[qtdEspec];
 
         for (int i = 0; i < qtdEspec; i++) {
-            nomesEsp[i] = especialidades[i].getSigla();
-            contagens[i] = 0;
-
-            for (int u = 0; u < totalUtentes; u++) {
-                if (utentes[u] != null &&
-                        utentes[u].getEspecialidadeEncaminhada() != null &&
-                        utentes[u].getEspecialidadeEncaminhada().equalsIgnoreCase(especialidades[i].getSigla())) {
-                    contagens[i]++;
-                }
-            }
+            nomesEsp[i] = especialidades[i].getNome();
+            contagens[i] = historicoContagemEspecialidades[i];
         }
-
         for (int i = 0; i < qtdEspec - 1; i++) {
             for (int j = 0; j < qtdEspec - 1 - i; j++) {
                 if (contagens[j] < contagens[j + 1]) {
                     int tempC = contagens[j];
                     contagens[j] = contagens[j + 1];
                     contagens[j + 1] = tempC;
+
                     String tempN = nomesEsp[j];
                     nomesEsp[j] = nomesEsp[j + 1];
                     nomesEsp[j + 1] = tempN;
@@ -1103,7 +1109,7 @@ public class Main {
 
         int top = Math.min(3, qtdEspec);
         for (int i = 0; i < top; i++) {
-            double percentagem = (totalUtentes > 0) ? ((double) contagens[i] / totalUtentes) * 100 : 0;
+            double percentagem = (totalUtentesHistorico > 0) ? ((double) contagens[i] / totalUtentesHistorico) * 100 : 0;
             System.out.printf("%dº. %-10s: %d utentes (%.1f%%)\n", (i + 1), nomesEsp[i], contagens[i], percentagem);
         }
 
@@ -1124,8 +1130,8 @@ public class Main {
         String opcao = "";
         do {
             System.out.println("\n" + CYAN_BOLD + "--- CONFIGURAÇÕES ATUAIS ---" + RESET);
-            System.out.println("1. Tempos de Consulta (Atual: " + TEMPO_CONSULTA_VERDE + "/" + TEMPO_CONSULTA_LARANJA + "/" + TEMPO_CONSULTA_VERMELHO + ")");
-            System.out.println("2. Tempos de Agravamento (Atual: " + TEMPO_AGRAVAMENTO_VERDE + "/" + TEMPO_AGRAVAMENTO_LARANJA + "/" + TEMPO_SAIDA_VERMELHO + ")");
+            System.out.println("1. Tempos de Consulta (Atual: " + TEMPO_CONSULTA_VERDE + "/" + TEMPO_CONSULTA_LARANJA + "/" + TEMPO_CONSULTA_VERMELHA + ")");
+            System.out.println("2. Tempos de Agravamento (Atual: " + TEMPO_AGRAVAMENTO_VERDE + "/" + TEMPO_AGRAVAMENTO_LARANJA + "/" + TEMPO_SAIDA_VERMELHA + ")");
             System.out.println("0. Voltar");
 
             System.out.print("Opção: ");
@@ -1139,7 +1145,7 @@ public class Main {
                         System.out.print("Novo tempo Média (Laranja): ");
                         TEMPO_CONSULTA_LARANJA = Integer.parseInt(ler.nextLine());
                         System.out.print("Novo tempo Urgente (Vermelho): ");
-                        TEMPO_CONSULTA_VERMELHO = Integer.parseInt(ler.nextLine());
+                        TEMPO_CONSULTA_VERMELHA = Integer.parseInt(ler.nextLine());
                         System.out.println(GREEN + "Tempos atualizados!" + RESET);
                         break;
                     case "2":
@@ -1148,7 +1154,7 @@ public class Main {
                         System.out.print("Horas p/ agravar Laranja->Vermelho: ");
                         TEMPO_AGRAVAMENTO_LARANJA = Integer.parseInt(ler.nextLine());
                         System.out.print("Horas p/ saída (Vermelho): ");
-                        TEMPO_SAIDA_VERMELHO = Integer.parseInt(ler.nextLine());
+                        TEMPO_SAIDA_VERMELHA = Integer.parseInt(ler.nextLine());
                         System.out.println(GREEN + "Critérios atualizados!" + RESET);
                         break;
                     case "0":
@@ -1181,22 +1187,22 @@ public class Main {
         System.out.println("--------------------------------------------------------------------------------");
 
         for (int i = 0; i < total; i++) {
-            Utente u = lista[i];
+            Utente utente = lista[i];
 
-            if (u != null && !u.isEmAtendimento()) {
+            if (utente != null && !utente.isEmAtendimento()) {
                 naFila++;
 
                 String corUrgencia = RESET;
-                if (u.getNivelSintoma() == NivelSintomas.VERMELHA) corUrgencia = RED;
-                else if (u.getNivelSintoma() == NivelSintomas.LARANJA) corUrgencia = YELLOW;
-                else if (u.getNivelSintoma() == NivelSintomas.VERDE) corUrgencia = GREEN;
+                if (utente.getNivelSintoma() == NivelSintomas.VERMELHA) corUrgencia = RED;
+                else if (utente.getNivelSintoma() == NivelSintomas.LARANJA) corUrgencia = YELLOW;
+                else if (utente.getNivelSintoma() == NivelSintomas.VERDE) corUrgencia = GREEN;
 
-                String nomeEspecialidade = (u.getEspecialidadeEncaminhada() != null) ? u.getEspecialidadeEncaminhada() : "---";
+                String nomeEspecialidade = (utente.getEspecialidadeEncaminhada() != null) ? utente.getEspecialidadeEncaminhada().getCodigo() : "---";
 
                 System.out.printf("%-20s " + corUrgencia + "%-15s" + RESET + " %-10s %-15s %s\n",
-                        u.getNomeUtente(),
-                        u.getNivelSintoma().getCor(),
-                        u.getTempoEsperaAtual() + "h",
+                        utente.getNomeUtente(),
+                        utente.getNivelSintoma().getCor(),
+                        utente.getTempoEsperaAtual() + "h",
                         nomeEspecialidade,
                         "AGUARDA VAGA");
             }
@@ -1211,64 +1217,53 @@ public class Main {
         pressionarEnter(ler);
     }
 
-    private static String calcularEspecialidadeAutomaticamente(Sintomas[] sintomasEscolhidos, int qtd) {
-        if (qtd == 0) return "Geral";
+    private static Especialidades calcularEspecialidadeAutomaticamente(Sintomas[] sintomasEscolhidos, int qtd) {
+        if (qtd == 0) return null;
 
         NivelSintomas urgenciaMaxima = NivelSintomas.VERDE;
-
         for (int i = 0; i < qtd; i++) {
-            NivelSintomas nivelAtual = sintomasEscolhidos[i].getNivelSintoma();
-
-            if (nivelAtual == NivelSintomas.VERMELHA) {
+            if (sintomasEscolhidos[i].getNivelSintoma() == NivelSintomas.VERMELHA) {
                 urgenciaMaxima = NivelSintomas.VERMELHA;
                 break;
             }
-            if (nivelAtual == NivelSintomas.LARANJA && urgenciaMaxima == NivelSintomas.VERDE) {
+            if (sintomasEscolhidos[i].getNivelSintoma() == NivelSintomas.LARANJA)
                 urgenciaMaxima = NivelSintomas.LARANJA;
-            }
         }
 
-        String[] nomesEncontrados = new String[qtd];
-        int[] contadores = new int[qtd];
+        Especialidades[] nomesEncontrados = new Especialidades[50];
+        int[] contadores = new int[50];
         int totalNomes = 0;
 
         for (int i = 0; i < qtd; i++) {
             if (sintomasEscolhidos[i].getNivelSintoma() == urgenciaMaxima) {
 
                 Especialidades especialidadeEnum = sintomasEscolhidos[i].getEspecialidadesAssociadas();
-                if (especialidadeEnum == null) continue;
-
-                String nomeEspecialidade = especialidadeEnum.name();
-
-
-                boolean encontrado = false;
-                for (int k = 0; k < totalNomes; k++) {
-                    if (nomesEncontrados[k].equals(nomeEspecialidade)) {
-                        contadores[k]++;
-                        encontrado = true;
+                if (especialidadeEnum != null) {
+                    boolean existe = false;
+                    for (int k = 0; k < totalNomes; k++) {
+                        if (nomesEncontrados[k] == especialidadeEnum)
+                            contadores[k]++;
+                        existe = true;
                         break;
                     }
-                }
-
-                if (!encontrado) {
-                    nomesEncontrados[totalNomes] = nomeEspecialidade;
-                    contadores[totalNomes] = 1;
-                    totalNomes++;
+                    if (!existe) {
+                        nomesEncontrados[totalNomes] = especialidadeEnum;
+                        contadores[totalNomes++] = 1;
+                    }
                 }
             }
         }
 
-        String maiorQtdDeSintomasIguais = null;
-        int maiorContagem = -1;
-
+        Especialidades vencedor = null;
+        int maximoVotos = -1;
         for (int i = 0; i < totalNomes; i++) {
-            if (contadores[i] > maiorContagem) {
-                maiorContagem = contadores[i];
-                maiorQtdDeSintomasIguais = nomesEncontrados[i];
+            if (contadores[i] > maximoVotos) {
+                maximoVotos = contadores[i];
+                vencedor = nomesEncontrados[i];
             }
         }
 
-        return maiorQtdDeSintomasIguais;
+        return vencedor;
     }
 
     private static void avancarUmaHora(Scanner ler) {
@@ -1299,29 +1294,39 @@ public class Main {
         for (int i = 0; i < totalUtentes; i++) {
             Utente utente = utentes[i];
 
-            if (utente != null && !utente.isEmAtendimento()) {
-                utente.incrementarEspera();
-                int espera = utente.getTempoEsperaAtual();
-                NivelSintomas nivel = utente.getNivelSintoma();
-
-                if (nivel == NivelSintomas.VERDE && espera >= TEMPO_AGRAVAMENTO_VERDE) {
-                    utente.setNivelSintoma(NivelSintomas.LARANJA);
-                    utente.resetarTempoEspera();
-                    notificacoes += " ! ATENÇÃO: Utente " + utente.getNomeUtente() + " agravou para LARANJA (Espera excessiva).\n";
-                }
-
-            else if (nivel == NivelSintomas.LARANJA && espera >= TEMPO_AGRAVAMENTO_LARANJA) {
-                    utente.setNivelSintoma(NivelSintomas.VERMELHA);
-                    utente.resetarTempoEspera();
-                    notificacoes += " !!! PERIGO: Utente " + utente.getNomeUtente() + " agravou para VERMELHO.\n";
-                }
-
-            else if (nivel == NivelSintomas.VERMELHA && espera >= TEMPO_SAIDA_VERMELHO) {
-                    notificacoes += " X UTENTE PERDIDO: " + utente.getNomeUtente() + " abandonou/transferido por falta de atendimento.\n";
-
-                    if (ficheiroUtentes.removerUtente(utente)) {
+            if (utente != null) {
+                if (utente.isEmAtendimento()) {
+                    Medico m = utente.getMedico();
+                    if (m != null && m.getUtenteAtual() != utente) {
+                        ficheiroUtentes.removerUtente(utente);
+                        ficheiroUtentes.guardarFicheiro(ARQUIVO_UTENTES, SEPARADOR);
+                        notificacoes += GREEN + " [ALTA] " + utente.getNomeUtente() + " terminou o tratamento e saiu.\n" + RESET;
                         i--;
                         totalUtentes--;
+                        continue;
+                    }
+                }
+
+                if (!utente.isEmAtendimento()) {
+                    utente.incrementarEspera();
+                    int espera = utente.getTempoEsperaAtual();
+                    NivelSintomas nivel = utente.getNivelSintoma();
+
+                    if (nivel == NivelSintomas.VERDE && espera >= TEMPO_AGRAVAMENTO_VERDE) {
+                        utente.setNivelSintoma(NivelSintomas.LARANJA);
+                        utente.resetarTempoEspera();
+                        notificacoes += " ! ATENÇÃO: Utente " + utente.getNomeUtente() + " agravou para LARANJA (Espera excessiva).\n";
+                    } else if (nivel == NivelSintomas.LARANJA && espera >= TEMPO_AGRAVAMENTO_LARANJA) {
+                        utente.setNivelSintoma(NivelSintomas.VERMELHA);
+                        utente.resetarTempoEspera();
+                        notificacoes += " !!! PERIGO: Utente " + utente.getNomeUtente() + " agravou para VERMELHO.\n";
+                    } else if (nivel == NivelSintomas.VERMELHA && espera >= TEMPO_SAIDA_VERMELHA) {
+                        notificacoes += " X UTENTE PERDIDO: " + utente.getNomeUtente() + " abandonou/transferido por falta de atendimento.\n";
+
+                        if (ficheiroUtentes.removerUtente(utente)) {
+                            i--;
+                            totalUtentes--;
+                        }
                     }
                 }
             }
@@ -1349,31 +1354,33 @@ public class Main {
         Medico[] medicos = ficheiroMedicos.getListaMedicos();
         Utente[] listaEspera = ficheiroUtentes.getPacientes();
 
+        boolean existeMdicoDisponivelNoTurno = false;
+
         for (int i = 0; i < ficheiroMedicos.getTotalMedicos(); i++) {
             Medico medico = medicos[i];
 
-            if (medico != null && medico.isDisponivel(hora) && !medico.isEmDescanso()) {
+            if (medico != null && medico.isDisponivel(hora)) {
+                existeMdicoDisponivelNoTurno = true;
 
                 Utente candidato = null;
+                int maiorUrgencia = -1;
 
                 for (int j = 0; j < ficheiroUtentes.getTotalDePacientes(); j++) {
                     Utente utente = listaEspera[j];
 
-                    if (utente != null && !utente.isEmAtendimento() && utente.getEspecialidadeEncaminhada() != null && medico.getEspecialidade() != null && utente.getEspecialidadeEncaminhada().equalsIgnoreCase(medico.getEspecialidade().getCodigo())) {
-                        if (candidato == null) {
-                            candidato = utente;
-                        }
-                        else {
-                            int pesoAtual = getNivelDeUrgencia(utente.getNivelSintoma());
-                            int pesoCandidato = getNivelDeUrgencia(candidato.getNivelSintoma());
+                    if (utente != null && !utente.isEmAtendimento() && utente.getEspecialidadeEncaminhada() != null) {
+                        String siglaUtente = utente.getEspecialidadeEncaminhada().getCodigo();
 
-                            if (pesoAtual > pesoCandidato) {
+                        String siglaMedico = medico.getEspecialidade().getCodigo();
+
+                        if (siglaUtente.equalsIgnoreCase(siglaMedico)) {
+
+                            int urgencia = getNivelDeUrgencia((utente.getNivelSintoma()));
+                            if (candidato == null || urgencia > maiorUrgencia) {
                                 candidato = utente;
-                            }
-                            else if (pesoAtual == pesoCandidato) {
-                                if (utente.getHoraEntrada() < candidato.getHoraEntrada()) {
-                                    candidato = utente;
-                                }
+                                maiorUrgencia = urgencia;
+                            } else if (urgencia == maiorUrgencia && utente.getHoraEntrada() < candidato.getHoraEntrada()) {
+                                candidato = utente;
                             }
                         }
                     }
@@ -1390,14 +1397,18 @@ public class Main {
                 }
             }
         }
-        return log.toString();
+
+        if (!existeMdicoDisponivelNoTurno && hora > 0) {
+
+        }
+        return  log.toString();
     }
 
     private static int getNivelDeUrgencia(NivelSintomas nivel) {
         if (nivel == null) return 0;
 
         switch (nivel.name()) {
-            case "VERMELHO": return 3;
+            case "VERMELHA": return 3;
             case "LARANJA": return 2;
             case "VERDE": return 1;
             default: return 0;

@@ -18,4 +18,12 @@ public enum Especialidades {
     public String getNome() {
         return nome;
     }
+    public static Especialidades getPorSigla(String sigla) {
+        for (Especialidades especialidades : values()) {
+            if (especialidades.getCodigo().equalsIgnoreCase(sigla.trim())) {
+                return especialidades;
+            }
+        }
+        return null;
+    }
 }

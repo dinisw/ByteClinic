@@ -1,6 +1,7 @@
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Formatter;
 import java.util.Scanner;
 import java.util.concurrent.ForkJoinPool;
@@ -62,10 +63,9 @@ public class FicheiroEspecialidade {
     //region GUARDAR FICHEIRO
     public void guardarFicheiro(String separador, String caminho) {
         try {
-            Formatter formatter = new Formatter(new FileWriter(caminho));
+            PrintWriter writer = new PrintWriter(new PrintWriter(caminho));
             for (int i = 0; i < totalEspecialidade; i++) {
-                Especialidade especialidade1 = listaEspecialidade[i];
-                formatter.format("%s%s%s", especialidade1.getSigla(), separador, especialidade1.getNome());
+                writer.println(listaEspecialidade[i].getSigla() + separador + listaEspecialidade[i].getNome());
             }
             System.out.println("Ficheiro guardado com sucesso.");
         } catch (IOException e) {
@@ -91,7 +91,6 @@ public class FicheiroEspecialidade {
         listaEspecialidade[totalEspecialidade -1] = null;
         totalEspecialidade--;
 
-        System.out.println("Removido com sucesso!");
         return true;
     }
     //endregion

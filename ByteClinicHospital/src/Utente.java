@@ -9,9 +9,9 @@ public class Utente {
     private int horaEntrada;
     private int tempoDeEsperaAtual;
     private boolean emAtendimento;
-    private String especialidadeEncaminhada;
+    private Especialidades especialidadeEncaminhada;
 
-    public Utente(String nomeUtente, Sintomas[] sintomas, NivelSintomas nivelSintomas, int horaEntrada, String especialidadeEncaminhada) {
+    public Utente(String nomeUtente, Sintomas[] sintomas, NivelSintomas nivelSintomas, int horaEntrada, Especialidades especialidadeEncaminhada) {
         this.nomeUtente = nomeUtente;
         this.sintomas = sintomas;
         this.nivelSintomas = nivelSintomas;
@@ -61,11 +61,11 @@ public class Utente {
         this.horaEntrada = horaEntrada;
     }
 
-    public String getEspecialidadeEncaminhada() {
+    public Especialidades getEspecialidadeEncaminhada() {
         return especialidadeEncaminhada;
     }
 
-    public void setEspecialidadeEncaminhada(String especialidadeEncaminhada) {
+    public void setEspecialidadeEncaminhada(Especialidades especialidadeEncaminhada) {
         this.especialidadeEncaminhada = especialidadeEncaminhada;
     }
 
@@ -97,7 +97,7 @@ public class Utente {
         if (getSintomas() != null) {
             for (int i = 0; i < getSintomas().length; i++) {
                 if (getSintomas()[i] != null) {
-                    if (sbSintomas.length() > 0) sbSintomas.append(separador);
+                    if (sbSintomas.length() > 0) sbSintomas.append(",");
                     sbSintomas.append(getSintomas()[i].getNomeSintoma());
                 }
             }
@@ -107,11 +107,11 @@ public class Utente {
 
         int cedulaMedico = (medico != null) ? medico.getCedulaProfissional() : -1;
 
-        String esp = (getEspecialidadeEncaminhada() != null) ? getEspecialidadeEncaminhada() : "NA";
+        String esp = (getEspecialidadeEncaminhada() != null) ? getEspecialidadeEncaminhada().getCodigo() : "NA";
 
         return String.format("%s;%s;%s;%d;%d;%s",
                 getNomeUtente(),
-                getNivelSintoma().getCor(),
+                getNivelSintoma().name(),
                 esp,
                 getHoraEntrada(),
                 cedulaMedico,

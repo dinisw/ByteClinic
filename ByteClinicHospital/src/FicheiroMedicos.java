@@ -47,7 +47,7 @@ public class FicheiroMedicos {
 
                     int horaEntrada = Integer.parseInt(dados[3]);
                     int horaSaida = Integer.parseInt(dados[4]);
-                    int salarioHora = Integer.parseInt(dados[5].replace(",", "."));
+                    Double salarioHora = Double.parseDouble(dados[5].replace(",", "."));
 
                     Medico medico = new Medico(nomeMedico, cedula, especialidade, horaEntrada, horaSaida, salarioHora);
                     adicionarMedico(medico);
@@ -172,7 +172,7 @@ public class FicheiroMedicos {
     //endregion
 
     //region ATUALIZAR MEDICO
-    public boolean atualizarMedico(int cedula, String novoNomeMedico, Especialidades novaEspecialidade, int novaHoraEntrada, int novaHoraSaida, int novoSalarioHora, String caminho, String separador) {
+    public boolean atualizarMedico(int cedula, String novoNomeMedico, Especialidades novaEspecialidade, int novaHoraEntrada, int novaHoraSaida, Double novoSalarioHora, String caminho, String separador) {
         Medico medico = procurarMedicoPorCedula(cedula);
         if (medico != null) {
             medico.setNomeMedico(novoNomeMedico);

@@ -73,7 +73,10 @@ public class FicheiroUtentes {
                 if (dados.length >= 6) {
                     String nome = dados[0];
                     NivelSintomas nivel = NivelSintomas.valueOf(dados[1]);
-                    String especialidade = dados[2].equals("NA") ? null : dados[2];
+                    Especialidades especialidade = null;
+                    if (!dados[2].equals("NA")) {
+                        especialidade = Especialidades.getPorSigla(dados[2]);
+                    }
                     int hora = Integer.parseInt(dados[3]);
                     int cedulaMedico = Integer.parseInt(dados[4]);
                     String stringSintomas = dados[5];
@@ -82,7 +85,7 @@ public class FicheiroUtentes {
                     int countSintomas = 0;
 
                     if (!stringSintomas.equals("NA")) {
-                        String[] nomesSintomas = stringSintomas.split("\\%s".formatted(separador));
+                        String[] nomesSintomas = stringSintomas.split(",");
                         for (String nomeSintoma : nomesSintomas) {
                             Sintomas sintomas = ficheirosSintomas.procurarSintoma(nomeSintoma);
                             if (sintomas != null) {
@@ -134,6 +137,6 @@ public class FicheiroUtentes {
     }
 
     public int getTotalDePacientes() {
-        return paciente.length;
+        return totalPacientes;
     }
 }
