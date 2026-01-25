@@ -349,6 +349,7 @@ public class Main {
 
                 Utente novoUtente = new Utente(nome, sintomasEscolhidos, nivelFinal, hora, especialidadesCalculado);
                 ficheiroUtentes.adicionaUtente(novoUtente);
+                ficheiroUtentes.guardarFicheiro(ARQUIVO_UTENTES,SEPARADOR);
 
                 if (especialidadesCalculado != null) {
                     Especialidades[] todasAsEspecialidades = Especialidades.values();
