@@ -104,23 +104,33 @@ public class FicheiroEspecialidade {
     //region PROCURAR ESPECIALIDADE
     public Especialidade procurarEspecialidade(String sigla) {
         for(int i = 0; i < totalEspecialidade; i++) {
-            if(listaEspecialidade[i].getSigla().equals(sigla)) {
+            if(listaEspecialidade[i].getSigla().equalsIgnoreCase(sigla)) {
                 return listaEspecialidade[i];
             }
         }
         return null;
     }
+
     public Especialidade[] procurarEspecialidades() {
-        Especialidade[] especialidades = new Especialidade[listaEspecialidade.length];
-        int i = 0;
-        for (var especialidade : listaEspecialidade) {
-            if (especialidade != null) {
-                especialidades[i] = especialidade;
-                i++;
-            }
+        Especialidade[] resultado = new Especialidade[totalEspecialidade];
+        for (int i = 0; i < totalEspecialidade; i++) {
+            resultado[i] = listaEspecialidade[i];
         }
-        return especialidades;
+        return resultado;
     }
+
+
+   // public Especialidade[] procurarEspecialidades() {
+   //     Especialidade[] especialidades = new Especialidade[listaEspecialidade.length];
+   //     int i = 0;
+   //     for (var especialidade : listaEspecialidade) {
+   //         if (especialidade != null) {
+   //             especialidades[i] = especialidade;
+   //             i++;
+   //         }
+   //     }
+   //     return especialidades;
+   // }
     //endregion
 
     public boolean atualizarEspecialidade(String sigla, String novoNome){
