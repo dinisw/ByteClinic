@@ -1,7 +1,5 @@
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
+import javax.xml.transform.Source;
+import java.io.*;
 import java.util.Formatter;
 import java.io.PrintWriter;
 import java.util.Scanner;
@@ -15,13 +13,16 @@ public class FicheirosSintomas {
         totalSintomas = 0;
     }
 
+    //region ADICIONAR SINTOMAS
     public void adicionarSintoma(Sintomas sintoma) {
-        if(totalSintomas == listaSintomas.length) {
+        if (totalSintomas == listaSintomas.length) {
             expandirArray();
         }
         listaSintomas[totalSintomas++] = sintoma;
     }
+    //endregion
 
+    //region EXPANDIR ARRAY
     public void expandirArray() {
         Sintomas[] expandido = new Sintomas[listaSintomas.length * 2];
         for (int i = 0; i < totalSintomas; i++) {
@@ -29,6 +30,7 @@ public class FicheirosSintomas {
         }
         this.listaSintomas = expandido;
     }
+    //endregion
 
     public void carregarSintomas(String caminho, String separador, FicheiroEspecialidade ficheiroEspecialidade) {
         File ficheiro = new File(caminho);
@@ -75,7 +77,13 @@ public class FicheirosSintomas {
                     Sintomas sintoma = new Sintomas(nomeDoSintoma, nivel, especialidadeEncontrada);
                     adicionarSintoma(sintoma);
                 }
+                String textoEsp = dados[2].trim().toUpperCase();
+                Especialidades esp;
+                if (textoEsp.equals("CARD")) esp = Especialidades.CARDIOLOGIA;
+                else if (textoEsp.equals("PEDI")) esp = Especialidades.PEDIATRIA;
+                else if (textoEsp.equals("ORTO")) esp = Especialidades.ORTOPEDIA;
             }
+            Sintomas sintomas = new Sintomas(nome, nivel, esp);
             ler.close();
             System.out.println("Sintomas carregados: " + totalSintomas);
 
@@ -83,6 +91,7 @@ public class FicheirosSintomas {
             System.out.println("Erro crítico ao ler ficheiro: " + e.getMessage());
         }
     }
+    //endregion
 
     public void guardarSintomas(String caminho, String separador) {
         try {
@@ -101,11 +110,13 @@ public class FicheirosSintomas {
             System.out.println("Erro ao carregar sintomas" + e.getMessage());
         }
     }
+    //endregion
 
+    //region REMOVER SINTOMA
     public boolean removerSintoma(String sintoma) {
         int contador = -1;
-        for(int i = 0; i < totalSintomas; i++) {
-            if(listaSintomas[i].getNomeSintoma().equalsIgnoreCase(sintoma)) {
+        for (int i = 0; i < totalSintomas; i++) {
+            if (listaSintomas[i].getNomeSintoma().equalsIgnoreCase(sintoma)) {
                 contador = i;
                 break;
             }
@@ -115,18 +126,18 @@ public class FicheirosSintomas {
         }
         listaSintomas[totalSintomas - 1] = null;
         totalSintomas--;
+        GestorLogs.registarSucesso("Sintoma removido do sistema: " + sintoma);
         return true;
     }
+    //endregion
 
-    public Sintomas[] getSintomas(){
-        return listaSintomas;
-    }
-
+    //region PROCURAR SINTOMA
     public Sintomas procurarSintoma(String sintoma) {
-        for(int i = 0; i < totalSintomas; i++) {
-            if(listaSintomas[i].getNomeSintoma().equalsIgnoreCase(sintoma)) return  listaSintomas[i];
+        for (int i = 0; i < totalSintomas; i++) {
+            if (listaSintomas[i].getNomeSintoma().equalsIgnoreCase(sintoma)) return listaSintomas[i];
         }
         return null;
     }
+    //endregion
 
 }

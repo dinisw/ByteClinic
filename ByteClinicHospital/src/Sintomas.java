@@ -9,12 +9,7 @@ public class Sintomas {
         this.especialidadesAssociadas = especialidadesAssociadas;
     }
 
-    public Sintomas(String nome, String nivelSintoma, String[] especialidades) {
-    }
-
-    public Sintomas() {
-    }
-
+    public Sintomas(){}
     public String getNomeSintoma() {
         return nomeSintoma;
     }

@@ -31,6 +31,7 @@ public class FicheiroEspecialidade {
             novo[i] = listaEspecialidade[i];
         }
         this.listaEspecialidade = novo;
+        System.out.println("Array redimensionado para: " + listaEspecialidade.length);
     }
     //endregion
 
@@ -48,13 +49,18 @@ public class FicheiroEspecialidade {
                 if(linha.trim().isEmpty()) continue;
                 String[] dados = linha.split(separador);
                 if(dados.length >= 2){
-                    Especialidade especialidade2 = new Especialidade(dados[0], dados[1]);
+                    String sigla = dados[0].trim();
+                    String nome = dados[1].trim();
+
+                    Especialidade especialidade2 = new Especialidade(sigla, nome);
                     adicionarEspecialidade(especialidade2);
                 }
             }
-            System.out.println("Especialidades carregadas: " + totalEspecialidade);
+            ler.close();
+            System.out.println("Especialidades carregados: " + totalEspecialidade);
         } catch (IOException e) {
-            System.out.println("Erro ao carregar o ficheiro: " + e.getMessage());
+            System.out.println("Erro: " + e.getMessage());
+            GestorLogs.registarErro("FicheiroEspecialidade", "Erro leitura: " + e.getMessage());
         }
     }
     //endregion
@@ -69,8 +75,8 @@ public class FicheiroEspecialidade {
             out.close();
             System.out.println("Ficheiro guardado com sucesso.");
         } catch (IOException e) {
-            System.out.println("Erro ao guardar ficheiro" + e.getMessage());
-        }
+            System.out.println("Erro ao guardar ficheiro:" + e.getMessage());
+            GestorLogs.registarErro("FicheiroEspecialidade", "Erro escrita: " + e.getMessage());        }
     }
     //endregion
 
@@ -83,7 +89,10 @@ public class FicheiroEspecialidade {
                 break;
             }
         }
-        if(contador == -1) return false;
+        if(contador == -1){
+            System.out.println("A especialidade não foi encontrado.");
+            return false;
+        }
 
         for(int i = contador; i < totalEspecialidade; i++) {
             listaEspecialidade[i] = listaEspecialidade[i+1];
@@ -104,7 +113,7 @@ public class FicheiroEspecialidade {
     //region PROCURAR ESPECIALIDADE
     public Especialidade procurarEspecialidade(String sigla) {
         for(int i = 0; i < totalEspecialidade; i++) {
-            if(listaEspecialidade[i].getSigla().equalsIgnoreCase(sigla)) {
+            if(listaEspecialidade[i].getSigla().equals(sigla)) {
                 return listaEspecialidade[i];
             }
         }
@@ -133,13 +142,12 @@ public class FicheiroEspecialidade {
    // }
     //endregion
 
-    public boolean atualizarEspecialidade(String sigla, String novoNome){
+    public void atualizarEspecialidade(String sigla, String novoNome){
         Especialidade especialidade = procurarEspecialidade(sigla);
         if (especialidade != null) {
             especialidade.setNome(novoNome);
-            return true;
+            guardarFicheiro("especialidades.txt");
         }
-        return false;
     }
     public Especialidade[] getLista() { return listaEspecialidade; }
     public int getTotal() { return totalEspecialidade; }
