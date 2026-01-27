@@ -1,9 +1,9 @@
 public class Sintomas {
     private String nomeSintoma;
     private NivelSintomas nivelSintomas;
-    private Especialidades especialidadesAssociadas;
+    private Especialidade especialidadesAssociadas;
 
-    public Sintomas(String nomeSintoma, NivelSintomas nivelSintomas, Especialidades especialidadesAssociadas) {
+    public Sintomas(String nomeSintoma, NivelSintomas nivelSintomas, Especialidade especialidadesAssociadas) {
         this.nomeSintoma = nomeSintoma;
         this.nivelSintomas = nivelSintomas;
         this.especialidadesAssociadas = especialidadesAssociadas;
@@ -31,11 +31,11 @@ public class Sintomas {
         this.nivelSintomas = nivelSintomas;
     }
 
-    public Especialidades getEspecialidadesAssociadas() {
+    public Especialidade getEspecialidadesAssociadas() {
         return especialidadesAssociadas;
     }
 
-    public void setEspecialidadesAssociadas(Especialidades especialidadesAssociadas) {
+    public void setEspecialidadesAssociadas(Especialidade especialidadesAssociadas) {
         this.especialidadesAssociadas = especialidadesAssociadas;
     }
 
@@ -51,7 +51,7 @@ public class Sintomas {
     public String paraFicheiro(String separador) {
         String linha = nomeSintoma + separador + nivelSintomas.name();
         if (especialidadesAssociadas != null) {
-            linha += separador + especialidadesAssociadas.getCodigo();
+            linha += separador + especialidadesAssociadas.getSigla();
         } else {
             linha += ";NA";
         }

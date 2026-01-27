@@ -110,6 +110,17 @@ public class FicheiroEspecialidade {
         }
         return null;
     }
+    public Especialidade[] procurarEspecialidades() {
+        Especialidade[] especialidades = new Especialidade[listaEspecialidade.length];
+        int i = 0;
+        for (var especialidade : listaEspecialidade) {
+            if (especialidade != null) {
+                especialidades[i] = especialidade;
+                i++;
+            }
+        }
+        return especialidades;
+    }
     //endregion
 
     public boolean atualizarEspecialidade(String sigla, String novoNome){

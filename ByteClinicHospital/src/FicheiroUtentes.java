@@ -59,7 +59,7 @@ public class FicheiroUtentes {
         }
     }
 
-    public void carregarFicheiro(FicheiroMedicos ficheiroMedicos, FicheirosSintomas ficheirosSintomas, String caminho, String separador) {
+    public void carregarFicheiro(FicheiroMedicos ficheiroMedicos, FicheirosSintomas ficheirosSintomas, String caminho, String separador, FicheiroEspecialidade ficheiroEspecialidade) {
         File ficheiro = new File(caminho);
         if (!ficheiro.exists()) return;
 
@@ -73,9 +73,12 @@ public class FicheiroUtentes {
                 if (dados.length >= 6) {
                     String nome = dados[0];
                     NivelSintomas nivel = NivelSintomas.valueOf(dados[1]);
-                    Especialidades especialidade = null;
+                    Especialidade especialidade = null;
+                    Especialidade[] especialidades = ficheiroEspecialidade.procurarEspecialidades();
                     if (!dados[2].equals("NA")) {
-                        especialidade = Especialidades.getPorSigla(dados[2]);
+                        for(var esp : especialidades){
+                            if(esp.getSigla().equals(dados[2])) especialidade = esp;
+                        }
                     }
                     int hora = Integer.parseInt(dados[3]);
                     int cedulaMedico = Integer.parseInt(dados[4]);

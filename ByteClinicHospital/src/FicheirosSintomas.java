@@ -30,7 +30,7 @@ public class FicheirosSintomas {
         this.listaSintomas = expandido;
     }
 
-    public void carregarSintomas(String caminho, String separador) {
+    public void carregarSintomas(String caminho, String separador, FicheiroEspecialidade ficheiroEspecialidade) {
         File ficheiro = new File(caminho);
         if (!ficheiro.exists()) {
             System.out.println("Erro: Ficheiro " + caminho + " não encontrado.");
@@ -59,13 +59,13 @@ public class FicheirosSintomas {
                         nivel = NivelSintomas.VERDE;
                     }
 
-                    Especialidades especialidadeEncontrada = null;
+                    Especialidade especialidadeEncontrada = null;
 
                     if (dados.length > 2) {
                         String codigoLido = dados[2].trim();
 
-                        for (Especialidades especialidade : Especialidades.values()) {
-                            if (especialidade.getCodigo().equalsIgnoreCase(codigoLido)) {
+                        for (Especialidade especialidade : ficheiroEspecialidade.procurarEspecialidades()) {
+                            if (especialidade.getSigla().equalsIgnoreCase(codigoLido)) {
                                 especialidadeEncontrada = especialidade;
                                 break;
                             }
@@ -89,7 +89,7 @@ public class FicheirosSintomas {
             PrintWriter writer = new PrintWriter(new FileWriter(caminho, false)); // false = sobrescrever
             for(int i = 0; i < totalSintomas; i++) {
                 if (listaSintomas[i] != null) {
-                String codigoEsp = (listaSintomas[i].getEspecialidadesAssociadas() != null) ? listaSintomas[i].getEspecialidadesAssociadas().getCodigo() : "NA";
+                String codigoEsp = (listaSintomas[i].getEspecialidadesAssociadas() != null) ? listaSintomas[i].getEspecialidadesAssociadas().getSigla() : "NA";
 
                 writer.println(listaSintomas[i].getNomeSintoma() + separador + listaSintomas[i].getNivelSintoma().name() + separador + codigoEsp);
                 }

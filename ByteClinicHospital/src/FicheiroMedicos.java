@@ -12,7 +12,7 @@ public class FicheiroMedicos {
         this.totalMedicos = 0;
     }
     //region CARREGAR FICHEIRO
-    public void carregarFicheiro(String caminho, String separador) {
+    public void carregarFicheiro(String caminho, String separador, FicheiroEspecialidade ficheiroEspecialidade) {
         File ficheiro = new File(caminho);
         if (!ficheiro.exists()) {
             System.out.println("O ficheiro " + caminho + " não existe!");
@@ -31,10 +31,10 @@ public class FicheiroMedicos {
                     int cedula = Integer.parseInt(dados[1]);
                     String especialidadeStr = dados[2].trim();
 
-                    Especialidades especialidade = null;
+                    Especialidade especialidade = null;
 
-                    for (Especialidades esp : Especialidades.values()) {
-                        if (esp.getCodigo().equalsIgnoreCase(especialidadeStr)) {
+                    for (Especialidade esp : ficheiroEspecialidade.procurarEspecialidades()) {
+                        if (esp.getSigla().equalsIgnoreCase(especialidadeStr)) {
                             especialidade = esp;
                             break;
                         }
@@ -75,7 +75,7 @@ public class FicheiroMedicos {
                             separador,
                             m.getCedulaProfissional(),
                             separador,
-                            m.getEspecialidade().getCodigo(),
+                            m.getEspecialidade().getSigla(),
                             separador,
                             m.getHoraEntrada(),
                             separador,
@@ -131,7 +131,7 @@ public class FicheiroMedicos {
     //endregion
 
     //region PROCURAR MEDICO POR ESPECIALIDADE
-    public Medico[] procurarMedicoPorEspecialidade(Especialidades especialidadeAlvo) {
+    public Medico[] procurarMedicoPorEspecialidade(Especialidade especialidadeAlvo) {
         int contador = 0;
 
         for (int i = 0; i < totalMedicos; i++) {
@@ -172,7 +172,7 @@ public class FicheiroMedicos {
     //endregion
 
     //region ATUALIZAR MEDICO
-    public boolean atualizarMedico(int cedula, String novoNomeMedico, Especialidades novaEspecialidade, int novaHoraEntrada, int novaHoraSaida, Double novoSalarioHora, String caminho, String separador) {
+    public boolean atualizarMedico(int cedula, String novoNomeMedico, Especialidade novaEspecialidade, int novaHoraEntrada, int novaHoraSaida, Double novoSalarioHora, String caminho, String separador) {
         Medico medico = procurarMedicoPorCedula(cedula);
         if (medico != null) {
             medico.setNomeMedico(novoNomeMedico);

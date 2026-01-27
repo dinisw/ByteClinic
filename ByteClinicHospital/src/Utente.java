@@ -9,9 +9,9 @@ public class Utente {
     private int horaEntrada;
     private int tempoDeEsperaAtual;
     private boolean emAtendimento;
-    private Especialidades especialidadeEncaminhada;
+    private Especialidade especialidadeEncaminhada;
 
-    public Utente(String nomeUtente, Sintomas[] sintomas, NivelSintomas nivelSintomas, int horaEntrada, Especialidades especialidadeEncaminhada) {
+    public Utente(String nomeUtente, Sintomas[] sintomas, NivelSintomas nivelSintomas, int horaEntrada, Especialidade especialidadeEncaminhada) {
         this.nomeUtente = nomeUtente;
         this.sintomas = sintomas;
         this.nivelSintomas = nivelSintomas;
@@ -61,11 +61,11 @@ public class Utente {
         this.horaEntrada = horaEntrada;
     }
 
-    public Especialidades getEspecialidadeEncaminhada() {
+    public Especialidade getEspecialidadeEncaminhada() {
         return especialidadeEncaminhada;
     }
 
-    public void setEspecialidadeEncaminhada(Especialidades especialidadeEncaminhada) {
+    public void setEspecialidadeEncaminhada(Especialidade especialidadeEncaminhada) {
         this.especialidadeEncaminhada = especialidadeEncaminhada;
     }
 
@@ -107,7 +107,7 @@ public class Utente {
 
         int cedulaMedico = (medico != null) ? medico.getCedulaProfissional() : -1;
 
-        String esp = (getEspecialidadeEncaminhada() != null) ? getEspecialidadeEncaminhada().getCodigo() : "NA";
+        String esp = (getEspecialidadeEncaminhada() != null) ? getEspecialidadeEncaminhada().getSigla() : "NA";
 
         return String.format("%s;%s;%s;%d;%d;%s",
                 getNomeUtente(),

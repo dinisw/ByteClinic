@@ -1,7 +1,7 @@
 public class Medico {
     private String nomeMedico;
     private int cedulaProfissional;
-    private Especialidades especialidade;
+    private Especialidade especialidade;
     private int horaEntrada;
     private int horaSaida;
     private Double salarioHora;
@@ -12,7 +12,7 @@ public class Medico {
     private Utente utenteAtual;
     private int totalPacientesAtendidos;
 
-    public Medico(String nomeMedico,int cedulaProfissional, Especialidades especialidade, int horaEntrada, int horaSaida, Double salarioHora) {
+    public Medico(String nomeMedico,int cedulaProfissional, Especialidade especialidade, int horaEntrada, int horaSaida, Double salarioHora) {
         this.nomeMedico = nomeMedico;
         this.cedulaProfissional = cedulaProfissional;
         this.especialidade = especialidade;
@@ -122,11 +122,11 @@ public class Medico {
         this.cedulaProfissional = cedulaProfissional;
     }
 
-    public Especialidades getEspecialidade() {
+    public Especialidade getEspecialidade() {
         return especialidade;
     }
 
-    public void setEspecialidade(Especialidades especialidade) {
+    public void setEspecialidade(Especialidade especialidade) {
         this.especialidade = especialidade;
     }
 
