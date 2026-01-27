@@ -104,13 +104,6 @@ public class Main {
                 case "7":
                     configuracoes(ler);
                     break;
-                case "8":
-                    addHora();
-                    System.out.println("\n" + GREEN + ">> Tempo avançou 1 hora." + RESET);
-                    System.out.println("    Novo horário: " + String.format("Dia %d - %02d:00", dia, hora));
-                    pressionarEnter(ler);
-                    break;
-
                 case "0":
                     System.out.println("\n" + YELLOW + "A guardar dados e a encerrar..." + RESET);
 
@@ -141,7 +134,7 @@ public class Main {
         String bordaInferior = "╚" + "═".repeat(LARGURA) + "╝";
 
         String titulo = "SISTEMA DE GESTÃO BYTECLINIC";
-        String tempo = String.format("Dia: %d | Hora: %02d:00", dia, hora);
+        String dataHora = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
 
         int paddingTitulo = (LARGURA - titulo.length()) / 2;
         String textoTitulo = String.format("%" + paddingTitulo + "s%s%-" + paddingTitulo + "s", "", titulo, "");
@@ -152,13 +145,13 @@ public class Main {
         String statusValor = "ONLINE - " + hora + ":00h";
         String statusCompleto = statusLabel + statusValor;
 
-        int espacoDisponivel = LARGURA - statusLabel.length() - statusValor.length() - tempo.length() - 1;
+        int espacoDisponivel = LARGURA - statusLabel.length() - statusValor.length() - dataHora.length() - 1;
         String paddingData = " ".repeat(Math.max(0, espacoDisponivel));
 
         System.out.println(CYAN_BOLD + bordaSuperior + RESET);
         System.out.println(CYAN_BOLD + "║" + WHITE_BOLD + textoTitulo + CYAN_BOLD + "║" + RESET);
         System.out.println(CYAN_BOLD + bordaMeio + RESET);
-        System.out.println(CYAN_BOLD + "║" + RESET + statusLabel + GREEN + statusValor + RESET + paddingData + BLUE + tempo + " " + CYAN_BOLD + "║" + RESET);
+        System.out.println(CYAN_BOLD + "║" + RESET + statusLabel + GREEN + statusValor + RESET + paddingData + BLUE + dataHora + " " + CYAN_BOLD + "║" + RESET);
         System.out.println(CYAN_BOLD + bordaInferior + RESET);
     }
 
@@ -287,8 +280,6 @@ public class Main {
 
                 if (opcao.equalsIgnoreCase("sair")) {
                     break;
-                } else if (opcao.equalsIgnoreCase("novo")) {
-                    registarSintomas(ler);
                 }
 
                 String[] partes = opcao.split("\\s*,\\s*");
@@ -508,10 +499,6 @@ public class Main {
             System.out.println(GREEN + "Médico registado com sucesso!" + RESET);
         } catch (NumberFormatException e) {
             System.out.println(RED + "Erro: Introduza números válidos." + RESET);
-            GestorLogs.registarErro("RegistarMedico", "Input inválido (não é número): " + e.getMessage());
-        } catch (Exception e) {
-            System.out.println(RED + "Erro:" + e.getMessage() + RESET);
-            GestorLogs.registarErro("RegistarMedico", "Erro inesperado: " + e.getMessage());
         }
         pressionarEnter(ler);
     }
@@ -528,7 +515,7 @@ public class Main {
         else {
             System.out.printf("%-10s %-20s %-10s %-15s %s\n", "CÉDULA", "NOME", "ESP.", "HORÁRIO", "ESTADO");
             System.out.println("-------------------------------------------------------------------------");
-            for (int i = 0; i < total; i++) {
+            for (int i=0 ; i<total; i++) {
                 Medico medico = lista[i];
                 String estadoStr;
                 if (medico.isOcupado()) {
@@ -765,7 +752,6 @@ public class Main {
 
         if (ficheiroEspecialidade.existeEspecialidade(sigla)) {
             System.out.println(RED + "Erro: Essa sigla já existe!" + RESET);
-            GestorLogs.registarErro("RegistarEspecialidade", "Tentativa de duplicar sigla: " + sigla);
         } else {
             System.out.print("Nome descritivo (ex: Ortopedia): ");
             String nome = ler.nextLine();
@@ -773,7 +759,6 @@ public class Main {
             ficheiroEspecialidade.adicionarEspecialidade(especialidade);
             ficheiroEspecialidade.guardarFicheiro("especialidades.txt", SEPARADOR);
             System.out.println(GREEN + "Especialidade registada com sucesso!" + RESET);
-            GestorLogs.registarSucesso("Nova Especialidade: " + nome + " (" + sigla + ")");
         }
         pressionarEnter(ler);
     }
@@ -801,7 +786,7 @@ public class Main {
     //region PESQUISAR ESPECIALIDADE
     private static void pesquisarEspecialidade(Scanner ler) {
         System.out.print("Qual a sigla a pesquisar? ");
-        String sigla = ler.nextLine().toUpperCase();
+        String sigla = ler.nextLine();
         Especialidade especialidade = ficheiroEspecialidade.procurarEspecialidade(sigla);
 
         if (especialidade != null) {
@@ -906,8 +891,7 @@ public class Main {
                     "1. Registar Novo Sintoma",
                     "2. Listar Sintomas e Cores",
                     "3. Pesquisar Sintoma",
-                    "4. Atualizar Sintoma",
-                    "5. Remover Sintoma",
+                    "4. Remover Sintoma",
                     "0. Sair"
             };
 
@@ -930,9 +914,6 @@ public class Main {
                     pesquisarSintoma(ler);
                     break;
                 case "4":
-                    atualizarSintoma(ler);
-                    break;
-                case "5":
                     removerSintoma(ler);
                     break;
                 case "0":
@@ -952,8 +933,7 @@ public class Main {
         String nome = capitalize(ler.nextLine());
 
         if (ficheirosSintomas.procurarSintoma(nome) != null) {
-            System.out.println(RED + "Erro: O Sintoma '" + nome + "' já existe!" + RESET);
-            GestorLogs.registarErro("RegistarSintomas", "Tentativa de duplicar sintoma: " + nome);
+            System.out.println(RED + "Erro: Esse Sintoma já existe!" + RESET);
             pressionarEnter(ler);
             return;
         } else {
@@ -973,7 +953,6 @@ public class Main {
             }
             if (opcao < 1 || opcao > nivelSintomas.length) {
                 System.out.println(RED + "Opção inválida." + RESET);
-                GestorLogs.registarErro("RegistarSintomas", "Opção de nível inválida.");
                 pressionarEnter(ler);
                 return;
             }
@@ -991,20 +970,17 @@ public class Main {
             for (Especialidade especialidades2 : ficheiroEspecialidade.procurarEspecialidades()) {
                 if (especialidades2.getSigla().equals(siglaIntroduzida)) {
                     especialidades = especialidades2;
-                    encontrada = true;
                     break;
                 }
             }
-            if (!encontrada && !siglaIntroduzida.isEmpty()) {
+
+            if (especialidades == null) {
                 System.out.println(YELLOW + "Erro: Sigla não encontrada no sistema. Será registado sem especialidade automática." + RESET);
-                GestorLogs.registarErro("RegistarSintomas", "Sigla não encontrada: " + siglaIntroduzida + ". Gravado como NA.");
             }
-            Sintomas sintomas = new Sintomas(nome, opcaoSelecionado, especialidades);
+            Sintomas sintomas = new Sintomas(nome,opcaoSelecionado,especialidades);
             ficheirosSintomas.adicionarSintoma(sintomas);
-            ficheirosSintomas.guardarSintomas("sintomas.txt");
 
             System.out.println(GREEN + "Sintoma registado com sucesso!" + RESET);
-            GestorLogs.registarSucesso("Novo sintoma criado: " + nome + " (" + opcaoSelecionado + ")");
             pressionarEnter(ler);
         }
     }
@@ -1015,8 +991,8 @@ public class Main {
         System.out.println("\n" + CYAN_BOLD + "--- LISTA DE SINTOMAS ---" + RESET);
         Sintomas[] lista = ficheirosSintomas.getSintomas();
 
-        if (lista == null || lista[0] == null) {
-            System.out.println(YELLOW + "Nenhum sintoma registado." + RESET);
+        if (lista == null) {
+            System.out.println(YELLOW + "Nenhuma sintomaregistado." + RESET);
         } else {
             System.out.printf("%-45s %-15s %-15s %-20s\n", "NOME", "COR", "URGÊNCIA", "ESPECIALIDADE");
             System.out.println("--------------------------------------------------------------------------");
