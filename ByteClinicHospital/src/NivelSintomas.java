@@ -1,7 +1,7 @@
 public enum NivelSintomas {
     VERDE("Baixo", "Verde"),
     LARANJA("Medio", "Laranja"),
-    VERMELHO("Urgente", "Vermelho");
+    VERMELHA("Urgente", "Vermelha");
 
     private final String nivel;
     private final String cor;

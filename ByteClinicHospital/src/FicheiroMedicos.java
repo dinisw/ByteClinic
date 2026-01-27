@@ -1,4 +1,6 @@
 import java.io.*;
+import java.util.Formatter;
+import java.util.Locale;
 import java.util.Scanner;
 
 import static java.lang.Double.parseDouble;
@@ -35,10 +37,10 @@ public class FicheiroMedicos {
      * @param caminho O caminho do ficheiro a ler.
      */
     //region CARREGAR FICHEIRO
-    public void carregarFicheiro(String caminho) {
+    public void carregarFicheiro(String caminho, String separador, FicheiroEspecialidade ficheiroEspecialidade) {
         File ficheiro = new File(caminho);
         if (!ficheiro.exists()) {
-            GestorLogs.registarErro("Ficheiro Médicos", "Ficheiro não existe.");
+            System.out.println("O ficheiro " + caminho + " não existe!");
             return;
         }
         try {
@@ -46,25 +48,43 @@ public class FicheiroMedicos {
             while (ler.hasNextLine()) {
                 String linha = ler.nextLine();
                 if (linha.trim().isEmpty()) continue;
-                String[] dados = linha.split(";");
-                if (dados.length >= 6) {
+
+                String[] dados = linha.split(separador);
+
+                if (dados.length == 6) {
                     String nomeMedico = dados[0];
-                    int cedula  = Integer.parseInt(dados[1]);
-                    String especialidadeStr = dados[2];
-                    Especialidades especialidade = Especialidades.ORTOPEDIA; //CORRRIGIR VITOR
+                    int cedula = Integer.parseInt(dados[1]);
+                    String especialidadeStr = dados[2].trim();
+
+                    Especialidade especialidade = null;
+
+                    for (Especialidade esp : ficheiroEspecialidade.procurarEspecialidades()) {
+                        if (esp.getSigla().equalsIgnoreCase(especialidadeStr)) {
+                            especialidade = esp;
+                            break;
+                        }
+                    }
+
+                    if (especialidade == null) {
+                        System.out.println("Aviso: Especialidade '" + especialidadeStr + "' desconhecida para o médico " + nomeMedico + ". A ignorar registo.");
+                        continue;
+                    }
+
                     int horaEntrada = Integer.parseInt(dados[3]);
                     int horaSaida = Integer.parseInt(dados[4]);
-                    double salarioHora = parseDouble(dados[5].trim().replace(",", "."));
-                    Medico medico = new Medico(nomeMedico,cedula, especialidade, horaEntrada, horaSaida, salarioHora);
+                    Double salarioHora = Double.parseDouble(dados[5].replace(",", "."));
+
+                    Medico medico = new Medico(nomeMedico, cedula, especialidade, horaEntrada, horaSaida, salarioHora);
                     adicionarMedico(medico);
                 }
             }
             ler.close();
             System.out.println("Médicos carregados: " + totalMedicos);
+            ler.close();
         } catch (FileNotFoundException e) {
-            System.out.println("Erro ao carregar médicos" + e.getMessage());
-            GestorLogs.registarErro("FicheiroMedicos", "Erro ao ler ficheiro: " + e.getMessage());
-
+            System.out.println("Erro ao carregar o ficheiro: " + e.getMessage());
+        } catch (NumberFormatException e) {
+            System.out.println("Erro de formato nos dados do ficheiro.");
         }
     }
     //endregion
@@ -74,47 +94,30 @@ public class FicheiroMedicos {
      * @param caminho O caminho ou nome do ficheiro ("medicos.txt").
      */
     //region GUARDAR FICHEIRO
-    public void guardarFicheiroMedico(String caminho) {
+    public void guardarFicheiroMedico(String caminho, String separador) {
         try {
             PrintWriter writer = new PrintWriter(caminho);
             for (int i = 0; i < totalMedicos; i++) {
-                Medico medico = listaMedicos[i];
-                writer.printf("%s;%d;%s;%d;%d;%.2f%n",
-                        medico.getNomeMedico(),
-                        medico.getCedulaProfissional(),
-                        medico.getEspecialidade(),
-                        medico.getHoraEntrada(),
-                        medico.getHoraSaida(),
-                        medico.getSalarioHora());
-            }
-            writer.close();
-            GestorLogs.registarSucesso("Médico guardado em ficheiro");
-        } catch (IOException ex) {
-            System.out.println("Erro ao guardar ficheiro" + ex.getMessage());
-            GestorLogs.registarErro("FicheiroMedicos", "Falha ao gravar médico" + ex.getMessage());
-        }
-    }
-
-    public void guardarTodosMedicos(String caminho) {
-        try {
-            PrintWriter writer = new PrintWriter(new FileWriter(caminho, false));
-
-            for (int i = 0; i < totalMedicos; i++) {
                 Medico m = listaMedicos[i];
                 if (m != null) {
-                    writer.printf("%s;%d;%s;%d;%d;%.2f%n",
+                    writer.printf(Locale.US, "%s%s%d%s%s%s%d%s%d%s%.2f%n",
                             m.getNomeMedico(),
+                            separador,
                             m.getCedulaProfissional(),
-                            m.getEspecialidade().getNome(),
+                            separador,
+                            m.getEspecialidade().getSigla(),
+                            separador,
                             m.getHoraEntrada(),
+                            separador,
                             m.getHoraSaida(),
+                            separador,
                             m.getSalarioHora());
                 }
             }
             writer.close();
-            System.out.println("Base de dados de médicos atualizada com sucesso.");
-        } catch (IOException e) {
-            System.out.println("Erro grave ao guardar médicos: " + e.getMessage());
+            System.out.println("Ficheiro guardado com sucesso.");
+        } catch (IOException ex) {
+            System.out.println("Erro ao guardar ficheiro" + ex.getMessage());
         }
     }
     //endregion
@@ -179,7 +182,7 @@ public class FicheiroMedicos {
      * @return especialidadeMedico caso seja encontrado.
      */
     //region PROCURAR MEDICO POR ESPECIALIDADE
-    public Medico[] procurarMedicoPorEspecialidade(Especialidades especialidadeAlvo) {
+    public Medico[] procurarMedicoPorEspecialidade(Especialidade especialidadeAlvo) {
         int contador = 0;
 
         for (int i = 0; i < totalMedicos; i++) {
@@ -240,7 +243,7 @@ public class FicheiroMedicos {
      * @param novoSalarioHora   Novo salario por hora inserido pelo utilizador.
      */
     //region ATUALIZAR MEDICO
-    public boolean atualizarMedico(int cedula, String novoNomeMedico, Especialidades novaEspecialidade, int novaHoraEntrada, int novaHoraSaida, int novoSalarioHora) {
+    public boolean atualizarMedico(int cedula, String novoNomeMedico, Especialidade novaEspecialidade, int novaHoraEntrada, int novaHoraSaida, Double novoSalarioHora, String caminho, String separador) {
         Medico medico = procurarMedicoPorCedula(cedula);
         if (medico != null) {
             medico.setNomeMedico(novoNomeMedico);
@@ -248,7 +251,8 @@ public class FicheiroMedicos {
             medico.setHoraEntrada(novaHoraEntrada);
             medico.setHoraSaida(novaHoraSaida);
             medico.setSalarioHora(novoSalarioHora);
-            guardarFicheiroMedico("medicos.txt");
+            guardarFicheiroMedico(caminho, separador);
+            return true;
         }
     }
     //endregion\

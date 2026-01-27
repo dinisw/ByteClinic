@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.Scanner;
 
 public class FicheiroUtentes {
-    private String CAMINHO_FICHEIRO = "utentes.txt";
     private Utente[] paciente;
     private int totalPacientes;
 
@@ -44,9 +43,9 @@ public class FicheiroUtentes {
         return true;
     }
 
-    public void guardarFicheiro(String separador) {
+    public void guardarFicheiro(String caminho, String separador) {
         try {
-            PrintWriter escritor = new PrintWriter(new FileWriter(CAMINHO_FICHEIRO, false));
+            PrintWriter escritor = new PrintWriter(new FileWriter(caminho, false));
 
             for (int i = 0; i < totalPacientes; i++) {
                 if (paciente[i] != null) {
@@ -60,8 +59,8 @@ public class FicheiroUtentes {
         }
     }
 
-    public void carregarFicheiro(FicheiroMedicos ficheiroMedicos, FicheirosSintomas ficheirosSintomas, String separador) {
-        File ficheiro = new File(CAMINHO_FICHEIRO);
+    public void carregarFicheiro(FicheiroMedicos ficheiroMedicos, FicheirosSintomas ficheirosSintomas, String caminho, String separador, FicheiroEspecialidade ficheiroEspecialidade) {
+        File ficheiro = new File(caminho);
         if (!ficheiro.exists()) return;
 
         try {
@@ -74,7 +73,13 @@ public class FicheiroUtentes {
                 if (dados.length >= 6) {
                     String nome = dados[0];
                     NivelSintomas nivel = NivelSintomas.valueOf(dados[1]);
-                    String especialidade = dados[2].equals("NA") ? null : dados[2];
+                    Especialidade especialidade = null;
+                    Especialidade[] especialidades = ficheiroEspecialidade.procurarEspecialidades();
+                    if (!dados[2].equals("NA")) {
+                        for(var esp : especialidades){
+                            if(esp.getSigla().equals(dados[2])) especialidade = esp;
+                        }
+                    }
                     int hora = Integer.parseInt(dados[3]);
                     int cedulaMedico = Integer.parseInt(dados[4]);
                     String stringSintomas = dados[5];
@@ -83,7 +88,7 @@ public class FicheiroUtentes {
                     int countSintomas = 0;
 
                     if (!stringSintomas.equals("NA")) {
-                        String[] nomesSintomas = stringSintomas.split("\\%s".formatted(separador));
+                        String[] nomesSintomas = stringSintomas.split(",");
                         for (String nomeSintoma : nomesSintomas) {
                             Sintomas sintomas = ficheirosSintomas.procurarSintoma(nomeSintoma);
                             if (sintomas != null) {
@@ -135,6 +140,6 @@ public class FicheiroUtentes {
     }
 
     public int getTotalDePacientes() {
-        return paciente.length;
+        return totalPacientes;
     }
 }

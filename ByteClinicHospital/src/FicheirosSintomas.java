@@ -1,6 +1,7 @@
 import javax.xml.transform.Source;
 import java.io.*;
 import java.util.Formatter;
+import java.io.PrintWriter;
 import java.util.Scanner;
 
 public class FicheirosSintomas {
@@ -31,27 +32,50 @@ public class FicheirosSintomas {
     }
     //endregion
 
-    //region CARREGAR SINTOMAS
-    public void carregarSintomas(String caminho) {
+    public void carregarSintomas(String caminho, String separador, FicheiroEspecialidade ficheiroEspecialidade) {
         File ficheiro = new File(caminho);
         if (!ficheiro.exists()) {
-            GestorLogs.registarErro("FicheiroSintomas", "Ficheiro sintomas.txt não encontrado. Será criado um novo.");
+            System.out.println("Erro: Ficheiro " + caminho + " não encontrado.");
             return;
         }
+
         try {
             Scanner ler = new Scanner(ficheiro);
             while (ler.hasNextLine()) {
                 String linha = ler.nextLine();
                 if (linha.trim().isEmpty()) continue;
-                String[] dados = linha.split(";");
+
+                String[] dados = linha.split(separador);
+
                 if (dados.length >= 2) {
-                    String nome = dados[0].trim();
+                    String nomeDoSintoma = dados[0].trim();
+
                     String textoNivel = dados[1].trim().toUpperCase();
+
                     NivelSintomas nivel;
-                    if (textoNivel.equals("VERMELHA")) {
-                        nivel = NivelSintomas.VERMELHO;
+
+                    try {
+                        nivel = NivelSintomas.valueOf(textoNivel);
+                    } catch (IllegalArgumentException e) {
+                        System.out.println("Aviso: Nível '" + textoNivel + "' inválido para " + nomeDoSintoma + ". Será definido como VERDE.");
+                        nivel = NivelSintomas.VERDE;
                     }
-                    nivel = NivelSintomas.valueOf(textoNivel);
+
+                    Especialidade especialidadeEncontrada = null;
+
+                    if (dados.length > 2) {
+                        String codigoLido = dados[2].trim();
+
+                        for (Especialidade especialidade : ficheiroEspecialidade.procurarEspecialidades()) {
+                            if (especialidade.getSigla().equalsIgnoreCase(codigoLido)) {
+                                especialidadeEncontrada = especialidade;
+                                break;
+                            }
+                        }
+                    }
+
+                    Sintomas sintoma = new Sintomas(nomeDoSintoma, nivel, especialidadeEncontrada);
+                    adicionarSintoma(sintoma);
                 }
                 String textoEsp = dados[2].trim().toUpperCase();
                 Especialidades esp;
@@ -61,31 +85,29 @@ public class FicheirosSintomas {
             }
             Sintomas sintomas = new Sintomas(nome, nivel, esp);
             ler.close();
-            GestorLogs.registarSucesso("Sintomas carregados do ficheiro. Total: " + totalSintomas);
             System.out.println("Sintomas carregados: " + totalSintomas);
+
         } catch (FileNotFoundException e) {
-            System.out.println("Erro ao carregar sintomas:" + e.getMessage());
-            GestorLogs.registarErro("FicheirosSintomas", "Erro de leitura: " + e.getMessage());
+            System.out.println("Erro crítico ao ler ficheiro: " + e.getMessage());
         }
     }
     //endregion
 
-    //region GUARDAR SINTOMA
-    public void guardarSintomas(String caminho) {
+    public void guardarSintomas(String caminho, String separador) {
         try {
-            PrintWriter out = new PrintWriter(caminho);
-            for (int i = 0; i < totalSintomas; i++) {
-                Sintomas sintoma = listaSintomas[i];
-                out.printf("%s;%s;%s%n",
-                        sintoma.getNomeSintoma(),
-                        sintoma.getNivelSintoma(),
-                        sintoma.getEspecialidadesAssociadas());
+            PrintWriter writer = new PrintWriter(new FileWriter(caminho, false)); // false = sobrescrever
+            for(int i = 0; i < totalSintomas; i++) {
+                if (listaSintomas[i] != null) {
+                String codigoEsp = (listaSintomas[i].getEspecialidadesAssociadas() != null) ? listaSintomas[i].getEspecialidadesAssociadas().getSigla() : "NA";
+
+                writer.println(listaSintomas[i].getNomeSintoma() + separador + listaSintomas[i].getNivelSintoma().name() + separador + codigoEsp);
+                }
             }
-            out.close();
-            GestorLogs.registarSucesso("Ficheiro sintomas.txt atualizado com sucesso.");
+
+            writer.close();
+            System.out.println("Sintomas guardados com sucesso.");
         } catch (IOException e) {
-            System.out.println("Erro ao guardar sintomas" + e.getMessage());
-            GestorLogs.registarErro("FicheirosSintomas", "Erro escrita: " + e.getMessage());
+            System.out.println("Erro ao carregar sintomas" + e.getMessage());
         }
     }
     //endregion
@@ -99,10 +121,7 @@ public class FicheirosSintomas {
                 break;
             }
         }
-        if (contador == -1) {
-            return false;
-        }
-        for (int i = contador; i < totalSintomas - 1; i++) {
+        for ( int i = contador; i < totalSintomas - 1; i++) { //Volta para a esquerda para não haver espaços vazios.
             listaSintomas[i] = listaSintomas[i + 1];
         }
         listaSintomas[totalSintomas - 1] = null;
@@ -121,20 +140,4 @@ public class FicheirosSintomas {
     }
     //endregion
 
-    //region ATUALIZAR SINTOMA
-    public boolean atualizarSintoma(String nomeSintoma, NivelSintomas nivelSintomas) {
-        Sintomas sintomas = procurarSintoma(nomeSintoma);
-        if (sintomas != null) {
-            sintomas.setNivelSintoma(nivelSintomas);
-            GestorLogs.registarSucesso("Nível de urgência atuaizado para o sintoma:" + nomeSintoma);
-            return true;
-        }
-        return false;
-    }
-    //endregion
-
-    public Sintomas[] getSintomas() {
-        if (listaSintomas.length > 0) return listaSintomas;
-        else return null;
-    }
 }

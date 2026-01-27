@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="ByteClinicHospital:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/ByteClinicHospital_jar</output-path>
+    <root id="archive" name="ByteClinicHospital.jar">
+      <element id="module-output" name="ByteClinicHospital" />
+    </root>
+  </artifact>
+</component>

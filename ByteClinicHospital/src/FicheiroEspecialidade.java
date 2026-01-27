@@ -36,10 +36,10 @@ public class FicheiroEspecialidade {
     //endregion
 
     //region CARREGAR FICHEIRO
-    public void carregarFicheiro(String caminho){
+    public void carregarFicheiro(String caminho, String separador){
         File ficheiro = new File(caminho);
         if(!ficheiro.exists()) {
-            GestorLogs.registarErro("FicheiroEspecialidade", "Ficheiro " + caminho + " não encontrado.");
+            System.out.println("O ficheiro " + caminho + " não existe!");
             return;
         }
         try {
@@ -47,7 +47,7 @@ public class FicheiroEspecialidade {
             while (ler.hasNextLine()) {
                 String linha = ler.nextLine();
                 if(linha.trim().isEmpty()) continue;
-                String[] dados = linha.split(";");
+                String[] dados = linha.split(separador);
                 if(dados.length >= 2){
                     String sigla = dados[0].trim();
                     String nome = dados[1].trim();
@@ -66,17 +66,14 @@ public class FicheiroEspecialidade {
     //endregion
 
     //region GUARDAR FICHEIRO
-    public void guardarFicheiro(String especialidade) {
+    public void guardarFicheiro(String caminho, String separador) {
         try {
-            PrintWriter out = new PrintWriter (especialidade);
+            PrintWriter out = new PrintWriter (caminho);
             for (int i = 0; i < totalEspecialidade; i++) {
-                Especialidade especialidade1 = listaEspecialidade[i];
-                out.printf("%s;%s%n",
-                        especialidade1.getSigla(),
-                        especialidade1.getNome());
+                out.println(listaEspecialidade[i].getSigla() + separador + listaEspecialidade[i].getNome());
             }
             out.close();
-            GestorLogs.registarSucesso("Ficheiro guardado com sucesso.");
+            System.out.println("Ficheiro guardado com sucesso.");
         } catch (IOException e) {
             System.out.println("Erro ao guardar ficheiro:" + e.getMessage());
             GestorLogs.registarErro("FicheiroEspecialidade", "Erro escrita: " + e.getMessage());        }
@@ -103,8 +100,6 @@ public class FicheiroEspecialidade {
         listaEspecialidade[totalEspecialidade -1] = null;
         totalEspecialidade--;
 
-        System.out.println("Removido com sucesso!");
-        guardarFicheiro("especialidades.txt");
         return true;
     }
     //endregion
@@ -124,6 +119,27 @@ public class FicheiroEspecialidade {
         }
         return null;
     }
+
+    public Especialidade[] procurarEspecialidades() {
+        Especialidade[] resultado = new Especialidade[totalEspecialidade];
+        for (int i = 0; i < totalEspecialidade; i++) {
+            resultado[i] = listaEspecialidade[i];
+        }
+        return resultado;
+    }
+
+
+   // public Especialidade[] procurarEspecialidades() {
+   //     Especialidade[] especialidades = new Especialidade[listaEspecialidade.length];
+   //     int i = 0;
+   //     for (var especialidade : listaEspecialidade) {
+   //         if (especialidade != null) {
+   //             especialidades[i] = especialidade;
+   //             i++;
+   //         }
+   //     }
+   //     return especialidades;
+   // }
     //endregion
 
     public void atualizarEspecialidade(String sigla, String novoNome){

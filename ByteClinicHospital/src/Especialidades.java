@@ -1,18 +1,28 @@
-public enum Especialidades {
-    CARDIOLOGIA("CARD", "Cardiologia"),
-    ORTOPEDIA("ORTO", "Ortopedia"),
-    PEDIATRIA("PEDI", "Pediatria");
+public class Especialidades {
+    private String sigla;
+    private String nome;
 
-    private final String codigo;
-    private final String nome;
+    public Especialidades(String sigla) {
+        this.sigla = sigla.toUpperCase();
+        this.nome = descobrirNomePelaSigla(this.sigla);
+    }
 
-    Especialidades(String codigo, String nome) {
-        this.codigo = codigo;
+    public Especialidades(String sigla, String nome) {
+        this.sigla = sigla.toUpperCase();
         this.nome = nome;
     }
 
-    public String getCodigo() {
-        return codigo;
+    private String descobrirNomePelaSigla(String sigla) {
+        switch (sigla) {
+            case "CARD": return "Cardiologia";
+            case "ORTO": return "Ortopedia";
+            case "PEDI": return "Pediatria";
+            default: return sigla;
+        }
+    }
+
+    public String getSigla() {
+        return sigla;
     }
 
     public String getNome() {

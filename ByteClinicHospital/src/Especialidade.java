@@ -6,13 +6,10 @@ public class Especialidade {
         this.sigla = sigla;
         this.nome = nome;
     }
+    public Especialidade() {}
 
     public String getSigla() {
         return sigla;
-    }
-
-    public void setSigla(String sigla) {
-        this.sigla = sigla;
     }
 
     public String getNome() {
@@ -25,6 +22,7 @@ public class Especialidade {
 
     @Override
     public String toString() {
-        return String.format("Sigla: %s | Nome: %s", sigla, nome);
+        return String.format("Especialidade [Sigla: %s] | [Nome: %s]",
+                sigla, nome);
     }
 }

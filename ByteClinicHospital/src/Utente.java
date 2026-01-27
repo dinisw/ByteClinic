@@ -10,9 +10,9 @@ public class Utente {
     private int horaEntrada;
     private int tempoDeEsperaAtual;
     private boolean emAtendimento;
-    private String especialidadeEncaminhada;
+    private Especialidade especialidadeEncaminhada;
 
-    public Utente(String nomeUtente, Sintomas[] sintomas, NivelSintomas nivelSintomas, int horaEntrada, String especialidadeEncaminhada) {
+    public Utente(String nomeUtente, Sintomas[] sintomas, NivelSintomas nivelSintomas, int horaEntrada, Especialidade especialidadeEncaminhada) {
         this.nomeUtente = nomeUtente;
         this.sintomas = sintomas;
         this.nivelSintomas = nivelSintomas;
@@ -62,11 +62,11 @@ public class Utente {
         this.horaEntrada = horaEntrada;
     }
 
-    public String getEspecialidadeEncaminhada() {
+    public Especialidade getEspecialidadeEncaminhada() {
         return especialidadeEncaminhada;
     }
 
-    public void setEspecialidadeEncaminhada(String especialidadeEncaminhada) {
+    public void setEspecialidadeEncaminhada(Especialidade especialidadeEncaminhada) {
         this.especialidadeEncaminhada = especialidadeEncaminhada;
     }
 
@@ -82,7 +82,6 @@ public class Utente {
 
     public void setEmAtendimento(boolean emAtendimento) {
         this.emAtendimento = emAtendimento;
-        // Se entrou em atendimento, reseta espera
         if(emAtendimento) this.tempoDeEsperaAtual = 0;
     }
 
@@ -95,12 +94,11 @@ public class Utente {
     }
 
     public String paraFicheiro(String separador) {
-
         StringBuilder sbSintomas = new StringBuilder();
         if (getSintomas() != null) {
             for (int i = 0; i < getSintomas().length; i++) {
                 if (getSintomas()[i] != null) {
-                    if (sbSintomas.length() > 0) sbSintomas.append(separador);
+                    if (sbSintomas.length() > 0) sbSintomas.append(",");
                     sbSintomas.append(getSintomas()[i].getNomeSintoma());
                 }
             }
@@ -110,11 +108,11 @@ public class Utente {
 
         int cedulaMedico = (medico != null) ? medico.getCedulaProfissional() : -1;
 
-        String esp = (getEspecialidadeEncaminhada() != null) ? getEspecialidadeEncaminhada() : "NA";
+        String esp = (getEspecialidadeEncaminhada() != null) ? getEspecialidadeEncaminhada().getSigla() : "NA";
 
         return String.format("%s;%s;%s;%d;%d;%s",
                 getNomeUtente(),
-                getNivelSintoma().getCor(),
+                getNivelSintoma().name(),
                 esp,
                 getHoraEntrada(),
                 cedulaMedico,
